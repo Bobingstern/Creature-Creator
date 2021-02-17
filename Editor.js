@@ -11,6 +11,12 @@ class Editor {
     this.world = new b2World(new b2Vec2(0, 50))
     this.bodies = []
     this.bodyScales = []
+    this.inSim = false
+    // Joint control
+    this.joints = []
+    this.jointDraw = false
+    this.jointBody = []
+    this.jointAnchorLocation = []
     // Buttons
     this.TestButton = this.makeButton("Test Creature", [0, 255, 0], 10, 10, 100, 50, 19)
     this.TestButton.mousePressed(this.addShitToWorld)
@@ -20,16 +26,10 @@ class Editor {
     this.ClearButton.mousePressed(this.ridWorldOfShit)
     this.ToggleDrawModeButton = this.makeButton("Switch to Joint mode", [0, 127, 255], 10, 60, 100, 50, 14)
     this.ToggleDrawModeButton.mousePressed(this.toggleMode)
-    // Joint control
-    this.jointDraw = false
-    this.jointBody = []
-    this.jointAnchorLocation = []
     // Ground
     this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1)
     this.groundWidth = width
     this.groundHeight = 20
-
-    this.joints = []
   }
 
   show() {
@@ -74,9 +74,30 @@ class Editor {
       ellipse(mouseX, mouseY, 10, 10)
       pop()
     }
+    if (this.jointDraw && !(this.inSim)) {
+      let closest = 0
+      let closestDist = 1000000000000
+      for (let i = 0; i < bodyData.length; i++) {
+        let d = dist(bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, mouseX, mouseY)
+        if (d < closestDist) {
+          closestDist = d
+          closest = i
+        }
+      }
+      push()
+      fill(255, 255, 255)
+      rectMode(CENTER)
+      rect(bodyData[closest][0] + bodyData[closest][2] / 2, bodyData[closest][1] + bodyData[closest][3] / 2, 20, 20)
+      pop()
+    }
   }
 
   addShitToWorld() {
+    editor.inSim = true
+    editor.TestButton.remove()
+    editor.UndoButton.remove()
+    editor.ClearButton.remove()
+    editor.ToggleDrawModeButton.remove()
     for (let i = 0; i < bodyData.length; i++) {
       editor.bodies.push(makeBox(editor.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, bodyData[i][2] / 2, bodyData[i][3] / 2, 1, 0.3, 0.1, 1))
       editor.bodyScales.push([bodyData[i][2] / 2, bodyData[i][3] / 2])
@@ -163,7 +184,7 @@ class Editor {
 }
 
 function mouseClicked() {
-  if (mouseY < 70) {
+  if (mouseY < 70 || editor.inSim) {
     return
   }
   if (editor.RectDraw) {
