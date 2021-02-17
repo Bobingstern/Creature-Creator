@@ -1,5 +1,5 @@
 class Editor {
-  constructor() {
+  constructor(evolveFunc) {
     // Rectangluar control
     this.RectDraw = false
     this.RectDrawX = null
@@ -12,24 +12,44 @@ class Editor {
     this.bodies = []
     this.bodyScales = []
     this.inSim = false
+    this.evolving = false
     // Joint control
     this.joints = []
     this.jointDraw = false
     this.jointBody = []
     this.jointAnchorLocation = []
     // Buttons
-    this.TestButton = this.makeButton("Test Creature", [0, 255, 0], 10, 10, 100, 50, 19)
-    this.TestButton.mousePressed(this.addShitToWorld)
-    this.UndoButton = this.makeButton("Undo", [255, 255, 0], 110, 10, 100, 50, 19)
-    this.UndoButton.mousePressed(this.ridLastPieceOfShit)
-    this.ClearButton = this.makeButton("Clear World", [255, 0, 0], 210, 10, 100, 50, 19)
-    this.ClearButton.mousePressed(this.ridWorldOfShit)
-    this.ToggleDrawModeButton = this.makeButton("Switch to Joint mode", [0, 127, 255], 10, 60, 100, 50, 14)
-    this.ToggleDrawModeButton.mousePressed(this.toggleMode)
+    this.makeButtons()
+    this.evolveFunction = evolveFunc
     // Ground
     this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1)
     this.groundWidth = width
     this.groundHeight = 20
+  }
+
+  makeButtons() {
+    this.TestButton = this.makeButton("Test Creature", [0, 255, 0], 10, 10, 100, 50, 19)
+    this.TestButton.mousePressed(this.addShitToWorld)
+    this.EvolveButton = this.makeButton("Evolve", [255, 127, 0], 110, 10, 100, 50, 19)
+    this.EvolveButton.mousePressed(this.evolve)
+    this.ToggleDrawModeButton = this.makeButton("Switch to Joint mode", [0, 127, 255], 210, 10, 100, 50, 14)
+    this.ToggleDrawModeButton.mousePressed(this.toggleMode)
+    this.UndoButton = this.makeButton("Undo (Glitchy)", [255, 255, 0], 310, 10, 100, 50, 18)
+    this.UndoButton.mousePressed(this.ridLastPieceOfShit)
+    this.ClearButton = this.makeButton("Clear World", [255, 0, 0], 410, 10, 100, 50, 19)
+    this.ClearButton.mousePressed(this.ridWorldOfShit)
+  }
+
+  evolve() {
+    editor.TestButton.remove()
+    editor.UndoButton.remove()
+    editor.ClearButton.remove()
+    editor.ToggleDrawModeButton.remove()
+    editor.EvolveButton.remove()
+    editor.RectDrawing = false
+    editor.jointDraw = false
+    editor.eolving = true
+    editor.evolveFunction()
   }
 
   show() {
@@ -37,7 +57,7 @@ class Editor {
     if (this.RectDraw) {
       push()
       fill(255, 255, 255, 50)
-      // rectMode(CENTER)
+      rectMode(CORNER)
       rect(this.RectDrawX, this.RectDrawY, (mouseX - this.RectDrawX), (mouseY - this.RectDrawY))
       pop()
     } else {
@@ -48,7 +68,7 @@ class Editor {
       for (let i = 0; i < bodyData.length; i++) {
         push()
         fill(255, 255, 255, 50)
-        // rectMode(CENTER)
+        rectMode(CORNER)
         rect(bodyData[i][0], bodyData[i][1], bodyData[i][2], bodyData[i][3])
         pop()
       }
@@ -84,20 +104,27 @@ class Editor {
           closest = i
         }
       }
-      push()
-      fill(255, 255, 255)
-      rectMode(CENTER)
-      rect(bodyData[closest][0] + bodyData[closest][2] / 2, bodyData[closest][1] + bodyData[closest][3] / 2, 20, 20)
-      pop()
+      if (bodyData.length > 0) {
+        push()
+        fill(255, 255, 255)
+        rectMode(CENTER)
+        rect(bodyData[closest][0] + bodyData[closest][2] / 2, bodyData[closest][1] + bodyData[closest][3] / 2, 20, 20)
+        pop()
+      }
     }
   }
 
   addShitToWorld() {
     editor.inSim = true
     editor.TestButton.remove()
+    if (!(editor.evolving)) {
+      editor.TestButton = editor.makeButton("Exit Simulation", [0, 255, 0], 10, 10, 100, 50, 19)
+      editor.TestButton.mousePressed(editor.exitSim)
+    }
     editor.UndoButton.remove()
     editor.ClearButton.remove()
     editor.ToggleDrawModeButton.remove()
+    editor.EvolveButton.remove()
     for (let i = 0; i < bodyData.length; i++) {
       editor.bodies.push(makeBox(editor.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, bodyData[i][2] / 2, bodyData[i][3] / 2, 1, 0.3, 0.1, 1))
       editor.bodyScales.push([bodyData[i][2] / 2, bodyData[i][3] / 2])
@@ -121,15 +148,29 @@ class Editor {
     }
   }
 
-  ridWorldOfShit() {
-    editor.bodies = []
-    editor.bodyScales = []
-    bodyData = []
-    editor.id = 0
+  exitSim() {
+    editor.inSim = false
+    editor.makeButtons()
     editor.world = 0
     editor.world = new b2World(new b2Vec2(0, 50))
-    this.bodies.push(makeBox(this.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1))
-    this.bodyScales.push([width, 20])
+    editor.bodies = []
+    editor.bodyScales = []
+    editor.bodies.push(makeBox(editor.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1))
+    editor.bodyScales.push([width, 20])
+    editor.drawMode = true
+    editor.RectDrawing = true
+    editor.jointDraw = false
+  }
+
+  ridWorldOfShit() {
+    bodyData = []
+    jointData = []
+    editor.world = 0
+    editor.world = new b2World(new b2Vec2(0, 50))
+    editor.bodies = []
+    editor.bodyScales = []
+    editor.bodies.push(makeBox(editor.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1))
+    editor.bodyScales.push([width, 20])
     editor.drawMode = true
   }
 
@@ -146,9 +187,9 @@ class Editor {
   toggleMode() {
     editor.ToggleDrawModeButton.remove()
     if (editor.RectDrawing) {
-      editor.ToggleDrawModeButton = editor.makeButton("Switch to Joint Mode", [0, 127, 255], 10, 60, 100, 50, 14)
+      editor.ToggleDrawModeButton = editor.makeButton("Switch to Joint Mode", [0, 127, 255], 210, 10, 100, 50, 14)
     } else {
-      editor.ToggleDrawModeButton = editor.makeButton("Switch to Rect Mode", [0, 127, 255], 10, 60, 100, 50, 14)
+      editor.ToggleDrawModeButton = editor.makeButton("Switch to Rect Mode", [0, 127, 255], 210, 10, 100, 50, 14)
     }
     editor.ToggleDrawModeButton.mousePressed(editor.toggleMode)
     editor.RectDrawing = !(editor.RectDrawing)
