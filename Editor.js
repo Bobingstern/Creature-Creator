@@ -25,8 +25,11 @@ class Editor {
     this.jointBody = []
     this.jointAnchorLocation = []
     // Ground
-    this.bodies.push(makeBox(this.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1))
-    this.bodyScales.push([width, 20])
+    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1)
+    this.groundWidth = width
+    this.groundHeight = 20
+
+    this.joints = []
   }
 
   show() {
@@ -69,7 +72,6 @@ class Editor {
       push()
       fill(255, 255, 0, 100)
       ellipse(mouseX, mouseY, 10, 10)
-
       pop()
     }
   }
@@ -80,6 +82,22 @@ class Editor {
       editor.bodyScales.push([bodyData[i][2] / 2, bodyData[i][3] / 2])
     }
     editor.drawMode = false
+    editor.addJointsUsingMathAndShit()
+    for (let i = 0; i < jointData.length; i++) {
+      let jointDef = new b2RevoluteJointDef()
+      jointDef.bodyA = editor.bodies[jointData[i][0]]
+      jointDef.bodyB = editor.bodies[jointData[i][1]]
+
+      let bodyAnchorPos = createVector(jointData[i][2], jointData[i][3])
+
+      let bodyAoffset = createVector(bodyAnchorPos.x / SCALE - editor.bodies[jointData[i][0]].GetPosition().x, bodyAnchorPos.y / SCALE - editor.bodies[jointData[i][0]].GetPosition().y)
+      let bodyBoffset = createVector(bodyAnchorPos.x / SCALE - editor.bodies[jointData[i][1]].GetPosition().x, bodyAnchorPos.y / SCALE - editor.bodies[jointData[i][1]].GetPosition().y)
+
+      jointDef.localAnchorA.Set(bodyAoffset.x, bodyAoffset.y)
+      jointDef.localAnchorB.Set(bodyBoffset.x, bodyBoffset.y)
+      jointDef.collideConnected = false
+      editor.joints.push(editor.world.CreateJoint(jointDef))
+    }
   }
 
   ridWorldOfShit() {
@@ -135,13 +153,19 @@ class Editor {
   }
 
   addJointsUsingMathAndShit() {
-    for (var i = 0; i < this.jointBody.length; i += 2){
-
+    let temps = 0
+    for (let i = 0; i < this.jointBody.length; i += 2) {
+      var toPush = [this.jointBody[i], this.jointBody[i + 1], this.jointAnchorLocation[temps][0], this.jointAnchorLocation[temps][1]]
+      jointData.push(toPush)
+      temps++
     }
   }
 }
 
 function mouseClicked() {
+  if (mouseY < 70) {
+    return
+  }
   if (editor.RectDraw) {
     bodyData.push([editor.RectDrawX, editor.RectDrawY, mouseX - editor.RectDrawX, mouseY - editor.RectDrawY, editor.id])
     editor.RectDraw = false
@@ -161,7 +185,8 @@ function mouseClicked() {
     }
     push()
     fill(255, 255, 255)
-    rect(bodyData[closest][0] + bodyData[closest][2] / 2, bodyData[closest][1] + bodyData[closest][3] / 2, 50, 50)
+    rectMode(CENTER)
+    rect(bodyData[closest][0] + bodyData[closest][2] / 2, bodyData[closest][1] + bodyData[closest][3] / 2, 20, 20)
     pop()
     if (editor.jointBody.length % 2 != 0 || editor.jointBody.length == 0 || editor.jointBody.length / editor.jointAnchorLocation.length == 2) {
       let id = bodyData[closest][4]
@@ -169,12 +194,14 @@ function mouseClicked() {
       console.log(editor.jointBody)
     } else {
       editor.jointAnchorLocation.push([mouseX, mouseY])
-      console.log(editor.jointAnchorLocation)
     }
   }
 }
 
 function keyPressed() {
+  if (mouseY < 70) {
+    return
+  }
   if (editor.RectDrawing) {
     if (keyCode === 82) {  // R
       editor.RectDraw = true
