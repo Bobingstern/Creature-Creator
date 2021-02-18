@@ -48,6 +48,7 @@ let started = false
 let editor
 let bodyData = []
 let jointData = []
+let jointLimits = []
 let SCALE = 30
 let WORLD
 let offset
@@ -65,6 +66,7 @@ function makeBox(world, bodyType, x, y, w, h, density, friction, res, mass, isSe
   bodyDef.position.y = y / SCALE
   fixDef.shape = new b2PolygonShape()
   fixDef.shape.SetAsBox(w / SCALE, h / SCALE)
+  fixDef.filter.group = isSens
   let body = world.CreateBody(bodyDef)
   body.CreateFixture(fixDef)
   return body
@@ -111,6 +113,7 @@ function draw() {
       showHumanPlaying();
     } else if (runBest) {  // if replaying the best ever game
       showBestEverPlayer();
+      console.log("best")
     } else {  //if just evolving normally
       if (!(population.done())) {  //if any players are alive then update them
         population.updateAlive();

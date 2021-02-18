@@ -14,30 +14,37 @@ class Player {
     this.bodies = []
     this.joints = []
     this.bodyScales = []
-    this.downScalar = 1
+    this.downScalar = 2
     this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000, 20, 1, 0.3, 0.1, 1)
     this.groundWidth = width
     this.groundHeight = 20
     this.speed = 200
     this.lazer = createVector(0, 0)
 
-
     for (let i = 0; i < bodyData.length; i++) {
       this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, 1, 0.3, 0.1, 1))
       this.bodyScales.push([(bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar])
     }
+
     for (let i = 0; i < jointData.length; i++) {
       let jointDef = new b2RevoluteJointDef()
       jointDef.bodyA = this.bodies[jointData[i][0]]
       jointDef.bodyB = this.bodies[jointData[i][1]]
+      jointDef.enableLimit = true
+
+      jointDef.lowerAngle = radians(jointLimits[i][0])
+      jointDef.upperAngle = radians(jointLimits[i][1])
+
+      jointDef.enableMotor = true
+      jointDef.maxMotorTorque = 10000
+
       let bodyAnchorPos = createVector(jointData[i][2], jointData[i][3])
       let bodyAoffset = createVector((bodyAnchorPos.x / SCALE - this.bodies[jointData[i][0]].GetPosition().x)/this.downScalar, (bodyAnchorPos.y / SCALE - this.bodies[jointData[i][0]].GetPosition().y)/this.downScalar)
       let bodyBoffset = createVector((bodyAnchorPos.x / SCALE - this.bodies[jointData[i][1]].GetPosition().x)/this.downScalar, (bodyAnchorPos.y / SCALE - this.bodies[jointData[i][1]].GetPosition().y)/this.downScalar)
       jointDef.localAnchorA.Set(bodyAoffset.x, bodyAoffset.y)
       jointDef.localAnchorB.Set(bodyBoffset.x, bodyBoffset.y)
       jointDef.collideConnected = false
-      jointDef.enableMotor = true
-      jointDef.maxMotorTorque = 100000
+
       this.joints.push(this.world.CreateJoint(jointDef))
     }
     this.genomeInputs = this.joints.length+this.bodies.length+this.bodies.length;
@@ -72,7 +79,7 @@ class Player {
     this.lazer.x += 1
 
     if (!(this.dead)) {
-      this.fitness += 0.001
+      this.fitness += this.bodies[0].GetPosition().x*SCALE
 
       this.score = this.fitness
       this.world.Step(1 / 60, 10, 10)
@@ -90,6 +97,24 @@ class Player {
       if (this.bodies[i].GetPosition().x*SCALE - this.lazer.x < bodyData[i][2]/2/this.downScalar){
         this.dead = true
       }
+    }
+  }
+
+  ded(){
+    this.world.Step(1/60, 10, 10)
+    for (var i=0;i<this.joints.length;i++){
+      this.world.DestroyJoint(this.joints[i])
+    }
+    for (let i = 0; i < this.bodies.length; i++) {
+      let pos = this.bodies[i].GetPosition()
+      let angle = this.bodies[i].GetAngle()
+      push()
+      fill(255, 0, 0, 10)
+      translate(pos.x * SCALE+offset.x, pos.y * SCALE)
+      rectMode(CENTER)
+      rotate(angle)
+      rect(0, 0, this.bodyScales[i][0] * 2, this.bodyScales[i][1] * 2)
+      pop()
     }
   }
 
