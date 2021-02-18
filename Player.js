@@ -20,6 +20,7 @@ class Player {
     this.groundHeight = 20
     this.speed = 200
     this.lazer = createVector(0, 0)
+    this.idiotJoints = []
 
     for (let i = 0; i < bodyData.length; i++) {
       this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, 1, 0.3, 0.1, 1))
@@ -30,10 +31,17 @@ class Player {
       let jointDef = new b2RevoluteJointDef()
       jointDef.bodyA = this.bodies[jointData[i][0]]
       jointDef.bodyB = this.bodies[jointData[i][1]]
-      jointDef.enableLimit = true
+      if (jointLimits[i][0] != 1000 && jointLimits[i][1] != 1000){
+        jointDef.enableLimit = true
+        jointDef.lowerAngle = radians(jointLimits[i][0])
+        jointDef.upperAngle = radians(jointLimits[i][1])
+      }
+      else{
+        jointDef.enableLimit = true
+        jointDef.lowerAngle = radians(-10)
+        jointDef.upperAngle = radians(10)
 
-      jointDef.lowerAngle = radians(jointLimits[i][0])
-      jointDef.upperAngle = radians(jointLimits[i][1])
+      }
 
       jointDef.enableMotor = true
       jointDef.maxMotorTorque = 10000
@@ -79,10 +87,11 @@ class Player {
     this.lazer.x += 1
 
     if (!(this.dead)) {
-      this.fitness += this.bodies[0].GetPosition().x*SCALE
 
-      this.score = this.fitness
       this.world.Step(1 / 60, 10, 10)
+      this.fitness += 0.1
+      this.score = this.fitness
+      this.lifespan += 0.001
       for (let i = 0; i < this.decision.length; i++) {
         if (this.decision[i] > 0.5) {
           this.rotateLeft(this.joints[i])

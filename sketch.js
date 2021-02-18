@@ -196,6 +196,7 @@ function showHumanPlaying() {
 }
 
 function showBestEverPlayer() {
+  
   if (!(population.bestPlayer.dead)) {  //if best player is not dead
     population.bestPlayer.look();
     population.bestPlayer.think();

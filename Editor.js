@@ -194,8 +194,8 @@ class Editor {
       pop()
 
       textSize(20)
-      text(this.curLeftAngle+" "+this.curRightAngle, 100, 100)
-      text("The Angle Limit thing is kinda confusing so i recommend testing the default angle to see how it works", 100, 200)
+      text("Lower: "+this.curLeftAngle+" Upper: "+this.curRightAngle, 50, 100)
+      text("The Angle Limit thing is kinda confusing so i recommend testing the default angle to see how it works", 50, 150)
     }
 
 
@@ -245,9 +245,16 @@ class Editor {
       let jointDef = new b2RevoluteJointDef()
       jointDef.bodyA = editor.bodies[jointData[i][0]]
       jointDef.bodyB = editor.bodies[jointData[i][1]]
-      jointDef.enableLimit = true
-      jointDef.lowerAngle = radians(jointLimits[i][0])
-      jointDef.upperAngle = radians(jointLimits[i][1])
+      if (jointLimits[i][0] != 1000 && jointLimits[i][1] != 1000){
+        jointDef.enableLimit = true
+        jointDef.lowerAngle = radians(jointLimits[i][0])
+        jointDef.upperAngle = radians(jointLimits[i][1])
+      }
+      else{
+        jointDef.enableLimit = true
+        jointDef.lowerAngle = radians(-1)
+        jointDef.upperAngle = radians(1)
+      }
 
       let bodyAnchorPos = createVector(jointData[i][2], jointData[i][3])
 
@@ -509,8 +516,11 @@ function keyPressed() {
     if (keyCode == 13){
       jointLimits.push([editor.curLeftAngle, editor.curRightAngle])
       editor.jointLimitMode = false
-      console.log(editor.jointAnchorLocations)
-      console.log(editor.jointBody)
+
+    }
+    if (keyCode == 78){
+      jointLimits.push([1, 10])
+      editor.jointLimitMode = false
     }
   }
 }
