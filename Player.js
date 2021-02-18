@@ -1,4 +1,5 @@
 class Player {
+
   constructor() {
     this.fitness = 0;
     this.vision = [];  //the input array fed into the neuralNet
@@ -13,11 +14,14 @@ class Player {
     this.bodies = []
     this.joints = []
     this.bodyScales = []
-    this.downScalar = 2
-    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1)
+    this.downScalar = 1
+    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000, 20, 1, 0.3, 0.1, 1)
     this.groundWidth = width
     this.groundHeight = 20
     this.speed = 200
+    this.lazer = createVector(0, 0)
+
+
     for (let i = 0; i < bodyData.length; i++) {
       this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, 1, 0.3, 0.1, 1))
       this.bodyScales.push([(bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar])
@@ -36,9 +40,9 @@ class Player {
       jointDef.maxMotorTorque = 100000
       this.joints.push(this.world.CreateJoint(jointDef))
     }
-    this.genomeInputs = this.joints.length+this.bodies.length;
+    this.genomeInputs = this.joints.length+this.bodies.length+this.bodies.length;
     this.genomeOutputs = this.joints.length;
-    this.brain = new Genome(this.genomeInputs, 1);
+    this.brain = new Genome(this.genomeInputs, this.genomeOutputs);
   }
 
   show() {
@@ -47,12 +51,17 @@ class Player {
       let angle = this.bodies[i].GetAngle()
       push()
       fill(255, 255, 255, 100)
-      translate(pos.x * SCALE, pos.y * SCALE)
+      translate(pos.x * SCALE+offset.x, pos.y * SCALE)
       rectMode(CENTER)
       rotate(angle)
       rect(0, 0, this.bodyScales[i][0] * 2, this.bodyScales[i][1] * 2)
       pop()
     }
+    push()
+    fill(255, 0, 0)
+    rectMode(CENTER)
+    rect(this.lazer.x+offset.x, height / 2, 10, height)
+    pop()
   }
 
   move() {
@@ -60,12 +69,26 @@ class Player {
   }
 
   update() {
-    this.world.Step(1 / 60, 10, 10)
-    for (let i = 0; i < this.decision.length; i++) {
-      if (this.decision[i] > 0.5) {
-        this.rotateLeft(this.joints[i])
-      } else {
-        this.rotateRight(this.joints[i])
+    this.lazer.x += 1
+
+    if (!(this.dead)) {
+      this.fitness += 0.001
+
+      this.score = this.fitness
+      this.world.Step(1 / 60, 10, 10)
+      for (let i = 0; i < this.decision.length; i++) {
+        if (this.decision[i] > 0.5) {
+          this.rotateLeft(this.joints[i])
+        } else {
+          this.rotateRight(this.joints[i])
+        }
+      }
+    }
+
+    for (var i = 0 ; i < this.bodies.length; i++) {
+
+      if (this.bodies[i].GetPosition().x*SCALE - this.lazer.x < bodyData[i][2]/2/this.downScalar){
+        this.dead = true
       }
     }
   }
@@ -85,6 +108,11 @@ class Player {
     for (var i=0;i<this.bodies.length;i++){
       this.vision[this.vision.length] = this.bodies[i].GetLinearVelocity().x
       this.vision[this.vision.length] = this.bodies[i].GetLinearVelocity().y
+    }
+
+    for (var i=0;i<this.bodies.length;i++){
+
+      this.vision[this.vision.length] = this.bodies[i].GetPosition().y*SCALE
     }
   }
 
@@ -121,7 +149,7 @@ class Player {
   }
 
   calculateFitness() {
-    this.fitness = random(10);
+
   }
 
   crossover(parent2) {

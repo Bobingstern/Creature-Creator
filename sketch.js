@@ -50,7 +50,7 @@ let bodyData = []
 let jointData = []
 let SCALE = 30
 let WORLD
-
+let offset
 
 function makeBox(world, bodyType, x, y, w, h, density, friction, res, mass, isSens) {
   let fixDef = new b2FixtureDef();
@@ -75,14 +75,34 @@ function evolve() {
   editor = null;
 }
 
+function getBest() {
+  let best_player = null
+  let best_fitness = 0
+  for (var i = 0; i < population.players.length; i++) {
+    if (population.players[i].fitness > best_fitness && !(population.players[i].dead)) {
+      best_fitness = population.players[i].fitness
+      best_player = population.players[i]
+    }
+  }
+  return best_player
+}
+
+
 function setup() {
   window.canvas = createCanvas(1280, 720);
+  frameRate(60)
   humanPlayer = new Player();
   editor = new Editor(evolve)
+  offset = createVector(0, 0)
 }
 
 function draw() {
   background(51)
+  push()
+  fill(255, 255, 255, 100)
+  rectMode(CORNER)
+  rect(-10000000, height-20, 100000000000000, 20)
+  pop()
   if (started){
     drawToScreen();
     if (showBestEachGen) {  //show the best of each gen
@@ -96,14 +116,47 @@ function draw() {
         population.updateAlive();
       } else {  //all dead
         //genetic algorithm
+        offset.x = 0
         population.naturalSelection();
       }
     }
-  }
-  else{
+
+
+    let bestPlayer = getBest()
+    if (!(bestPlayer == null)) {
+      push()
+      let easing = 0.05;
+      let targetX = -1 * bestPlayer.bodies[0].GetPosition().x * SCALE+500;
+      let dx = targetX - offset.x;
+      if (targetX*-1 > 500){
+
+        offset.x += dx * easing;
+      }
+
+
+      translate(offset.x, 0)
+      fill(0, 0, 0)
+      for (var i = 0; i < 1000; i++) {
+        //text(i*10, i*300, 100)
+        fill(0)
+        rect(i * 20, height - 20, 10, 20)
+        fill(255, 255, 0)
+        rect(i * 20+10, height - 20, 10, 20)
+      }
+      pop()
+    }
+
+
+  } else {
     editor.show()
     editor.update()
   }
+
+
+
+
+
+
 }
 
 function startEvo(){
@@ -205,63 +258,5 @@ function writeInfo() {
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 
 function keyPressed() {
-  switch (key) {
-    case ' ':
-      //toggle showBest
-      showBest = !showBest;
-      break;
-      // case '+': //speed up frame rate
-      //   speed += 10;
-      //   frameRate(speed);
-      //   prletln(speed);
-      //   break;
-      // case '-': //slow down frame rate
-      //   if(speed > 10) {
-      //     speed -= 10;
-      //     frameRate(speed);
-      //     prletln(speed);
-      //   }
-      //   break;
-    case 'B': //run the best
-      runBest = !runBest;
-      break;
-    case 'G': //show generations
-      showBestEachGen = !showBestEachGen;
-      upToGen = 0;
-      genPlayerTemp = population.genPlayers[upToGen].clone();
-      break;
-    case 'N': //show absolutely nothing in order to speed up computation
-      showNothing = !showNothing;
-      break;
-    case 'P': //play
-      humanPlaying = !humanPlaying;
-      humanPlayer = new Player();
-      break;
-  }
-  //any of the arrow keys
-  switch (keyCode) {
-    case UP_ARROW: //the only time up/ down / left is used is to control the player
-      //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
-      break;
-    case DOWN_ARROW:
-      //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
-      break;
-    case LEFT_ARROW:
-      //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
-      break;
-    case RIGHT_ARROW: //right is used to move through the generations
 
-      if (showBestEachGen) { //if showing the best player each generation then move on to the next generation
-        upToGen++;
-        if (upToGen >= population.genPlayers.length) { //if reached the current generation then exit out of the showing generations mode
-          showBestEachGen = false;
-        } else {
-          genPlayerTemp = population.genPlayers[upToGen].cloneForReplay();
-        }
-      } else if (humanPlaying) { //if the user is playing then move player right
-
-        //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
-      }
-      break;
-  }
 }

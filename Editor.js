@@ -25,6 +25,16 @@ class Editor {
     this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width, 20, 1, 0.3, 0.1, 1)
     this.groundWidth = width
     this.groundHeight = 20
+    this.TestButton
+    this.TestButton
+    this.EvolveButton
+    this.EvolveButton
+    this.ToggleDrawModeButton
+    this.ToggleDrawModeButton
+    this.UndoButton
+    this.UndoButton
+    this.ClearButton
+    this.ClearButton
   }
 
   makeButtons() {
@@ -46,6 +56,7 @@ class Editor {
     editor.ClearButton.remove()
     editor.ToggleDrawModeButton.remove()
     editor.EvolveButton.remove()
+
     editor.RectDrawing = false
     editor.jointDraw = false
     editor.eolving = true
@@ -104,11 +115,18 @@ class Editor {
           closest = i
         }
       }
+
+      for (var i = 0; i < this.jointAnchorLocation.length; i++) {
+        push()
+        fill(255, 255, 0, 100)
+        ellipse(this.jointAnchorLocation[i][0], this.jointAnchorLocation[i][1], 10, 10)
+        pop()
+      }
       if (bodyData.length > 0) {
         push()
-        fill(255, 255, 255)
-        rectMode(CENTER)
-        rect(bodyData[closest][0] + bodyData[closest][2] / 2, bodyData[closest][1] + bodyData[closest][3] / 2, 20, 20)
+        fill(255, 255, 0, 50)
+        rectMode(CORNER)
+        rect(bodyData[closest][0], bodyData[closest][1], bodyData[closest][2], bodyData[closest][3])
         pop()
       }
     }
@@ -125,6 +143,7 @@ class Editor {
     editor.ClearButton.remove()
     editor.ToggleDrawModeButton.remove()
     editor.EvolveButton.remove()
+
     for (let i = 0; i < bodyData.length; i++) {
       editor.bodies.push(makeBox(editor.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, bodyData[i][2] / 2, bodyData[i][3] / 2, 1, 0.3, 0.1, 1))
       editor.bodyScales.push([bodyData[i][2] / 2, bodyData[i][3] / 2])
@@ -199,7 +218,7 @@ class Editor {
   update() {
     // Rect
     if (!this.drawMode) {
-      this.world.Step(1/60, 10, 10)
+      this.world.Step(1 / 60, 10, 10)
     }
   }
 
@@ -209,8 +228,12 @@ class Editor {
     button.position(x, y)
     button.size(w, h)
     button.style("font-size", size)
-    button.mouseOver(function() {button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], 100))})
-    button.mouseOut(function() {button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], 255))})
+    button.mouseOver(function() {
+      button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], 100))
+    })
+    button.mouseOut(function() {
+      button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], 255))
+    })
     return button
   }
 
@@ -225,7 +248,7 @@ class Editor {
 }
 
 function mouseClicked() {
-  if (mouseY < 70 || editor.inSim) {
+  if (mouseY < 70 || editor == null || editor.inSim) {
     return
   }
   if (editor.RectDraw) {
@@ -261,20 +284,79 @@ function mouseClicked() {
 }
 
 function keyPressed() {
-  if (mouseY < 70) {
+  switch (key) {
+    case ' ':
+      //toggle showBest
+      showBest = !showBest;
+      break;
+      // case '+': //speed up frame rate
+      //   speed += 10;
+      //   frameRate(speed);
+      //   prletln(speed);
+      //   break;
+      // case '-': //slow down frame rate
+      //   if(speed > 10) {
+      //     speed -= 10;
+      //     frameRate(speed);
+      //     prletln(speed);
+      //   }
+      //   break;
+    case 'B': //run the best
+      runBest = !runBest;
+      break;
+    case 'G': //show generations
+      showBestEachGen = !showBestEachGen;
+      upToGen = 0;
+      genPlayerTemp = population.genPlayers[upToGen].clone();
+      break;
+    case 'N': //show absolutely nothing in order to speed up computation
+      showNothing = !showNothing;
+      break;
+    case 'P': //play
+      humanPlaying = !humanPlaying;
+      humanPlayer = new Player();
+      break;
+  }
+  //any of the arrow keys
+  switch (keyCode) {
+    case UP_ARROW: //the only time up/ down / left is used is to control the player
+      //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
+      break;
+    case DOWN_ARROW:
+      //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
+      break;
+    case LEFT_ARROW:
+      //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
+      break;
+    case RIGHT_ARROW: //right is used to move through the generations
+
+      if (showBestEachGen) { //if showing the best player each generation then move on to the next generation
+        upToGen++;
+        if (upToGen >= population.genPlayers.length) { //if reached the current generation then exit out of the showing generations mode
+          showBestEachGen = false;
+        } else {
+          genPlayerTemp = population.genPlayers[upToGen].cloneForReplay();
+        }
+      } else if (humanPlaying) { //if the user is playing then move player right
+
+        //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
+      }
+      break;
+  }
+  if (mouseY < 70 || editor == null) {
     return
   }
   if (editor.RectDrawing) {
-    if (keyCode === 82) {  // R
+    if (keyCode === 82) { // R
       editor.RectDraw = true
       editor.RectDrawX = mouseX
       editor.RectDrawY = mouseY
     }
   }
-  if (keyCode === 90) {  // Z
+  if (keyCode === 90) { // Z
     editor.ridLastPieceOfShit()
   }
-  if (keyCode === 84) {  // T
+  if (keyCode === 84) { // T
     editor.toggleMode()
   }
 }
