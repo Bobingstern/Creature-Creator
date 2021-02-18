@@ -93,7 +93,9 @@ class Population {
     // }
 
     console.log("generation  " + this.gen + "  Number of mutations  " + this.innovationHistory.length + "  species:   " + this.species.length + "  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-
+    for (var i=0;i<this.players.length;i++){
+      this.players[i].world = 0
+    }
 
     var averageSum = this.getAvgFitnessSum();
     var children = [];

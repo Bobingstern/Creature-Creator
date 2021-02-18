@@ -58,6 +58,9 @@ class Player {
     this.genomeInputs = this.joints.length+this.bodies.length+this.bodies.length;
     this.genomeOutputs = this.joints.length;
     this.brain = new Genome(this.genomeInputs, this.genomeOutputs);
+
+    this.lazer.x = this.bodies[0].GetPosition().x*SCALE-200
+
   }
 
   show() {
@@ -65,7 +68,8 @@ class Player {
       let pos = this.bodies[i].GetPosition()
       let angle = this.bodies[i].GetAngle()
       push()
-      fill(255, 255, 255, 100)
+
+      fill(255, 255, 255, 200)
       translate(pos.x * SCALE+offset.x, pos.y * SCALE)
       rectMode(CENTER)
       rotate(angle)
@@ -118,6 +122,7 @@ class Player {
       let pos = this.bodies[i].GetPosition()
       let angle = this.bodies[i].GetAngle()
       push()
+      blendMode(LIGHTEST);
       fill(255, 0, 0, 10)
       translate(pos.x * SCALE+offset.x, pos.y * SCALE)
       rectMode(CENTER)

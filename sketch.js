@@ -93,7 +93,7 @@ function getBest() {
 function setup() {
   window.canvas = createCanvas(1280, 720);
   frameRate(60)
-  humanPlayer = new Player();
+  
   editor = new Editor(evolve)
   offset = createVector(0, 0)
 }
@@ -163,7 +163,7 @@ function draw() {
 }
 
 function startEvo(){
-  population = new Population(100);
+  population = new Population(200);
   started = true
   console.log('cheese')
 }
@@ -196,7 +196,7 @@ function showHumanPlaying() {
 }
 
 function showBestEverPlayer() {
-  
+
   if (!(population.bestPlayer.dead)) {  //if best player is not dead
     population.bestPlayer.look();
     population.bestPlayer.think();
