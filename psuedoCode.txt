@@ -1,3 +1,0 @@
-1) Select 2 bodies
-2) Set Joint Location
-3) Add to global variable along with local anchor points if joint is not exact
