@@ -55,7 +55,7 @@ let offset
 let offBeg
 let lazerSpeed = 1
 let bodyCopy = []
-
+let offY = 0
 let lUp
 let lDown
 
@@ -145,7 +145,7 @@ function draw() {
       let easing = 0.05;
       let targetX = -1 * bestPlayer.bodies[0].GetPosition().x * SCALE+500;
       let dx = targetX - offset.x;
-      if (targetX*-1 > 400){
+      if (targetX*-1 > 0){
 
         offset.x += dx * easing;
       }
@@ -156,9 +156,9 @@ function draw() {
       for (var i = -1000; i < 1000; i++) {
         //text(i*10, i*300, 100)
         fill(0)
-        rect(i * 20, height - 20, 10, 20)
+        rect(i * 20, height-20, 10, 20)
         fill(255, 255, 0)
-        rect(i * 20+10, height - 20, 10, 20)
+        rect(i * 20+10, height-20, 10, 20)
       }
       pop()
     }
@@ -177,10 +177,24 @@ function draw() {
 }
 
 function startEvo(){
+  var lowestY = 0
+  for (var i=0;i<bodyData.length;i++){
+    if (bodyData[i][1]-bodyData[i][3] > lowestY){
+      lowestY = bodyData[i][1]-bodyData[i][3]
+    }
+  }
+  offY = height-lowestY
+
+
   population = new Population(200);
   started = true
+
   offBeg = population.players[0].bodies[0].GetPosition().x*SCALE-400
   offset.x = offBeg
+
+
+
+
 }
 
 function showBestPlayersForEachGeneration() {

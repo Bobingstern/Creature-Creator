@@ -32,9 +32,9 @@ class Population {
             this.globalBestScore = this.players[i].score;
           }
         }
-        else[
+        else if (!showBest){
           this.players[i].ded()
-        ]
+        }
       }
 
     }

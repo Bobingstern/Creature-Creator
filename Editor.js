@@ -35,6 +35,7 @@ class Editor {
     this.MouseJoint = 0
     this.fakeBodyData = []
     this.rectDrawFlag = false
+    this.rectDeleteMode = false
 
 
   }
@@ -50,9 +51,13 @@ class Editor {
     this.UndoButton.mousePressed(this.ridLastPieceOfShit)
     this.ClearButton = this.makeButton("Clear World", [255, 0, 0], 410, 10, 100, 50, 19)
     this.ClearButton.mousePressed(this.ridWorldOfShit)
+    this.DeletButton = this.makeButton("Delete Mode", [255, 0, 255], 510, 10, 100, 50, 19)
+    this.DeletButton.mousePressed(this.rectDelMode)
+
   }
 
   evolve() {
+    editor.DeletButton.remove()
     editor.TestButton.remove()
     editor.UndoButton.remove()
     editor.ClearButton.remove()
@@ -81,14 +86,24 @@ class Editor {
 
   show() {
     // Rect stuff
-    if (this.RectDrawing){
+
+
+
+
+    if (this.RectDrawing && !this.rectDeleteMode){
       textSize(20)
       fill(255, 0, 0)
       text("Click to make a starting point for your rectangle and move your mouse\nIt must got from left to right or it will not work, click to confirm the placement", 50, 100)
     }
 
+    if (this.rectDeleteMode){
+      textSize(20)
+      fill(255, 0, 0)
+      text("Delete Mode, Figure it out", 50, 100)
+    }
 
-    if (this.RectDraw) {
+
+    if (this.RectDraw && !this.rectDeleteMode) {
       if (mouseX - editor.RectDrawX > 10 && mouseY - editor.RectDrawY > 10){
         push()
         fill(255, 255, 255, 50)
@@ -96,7 +111,7 @@ class Editor {
         rect(this.RectDrawX, this.RectDrawY, (mouseX - this.RectDrawX), (mouseY - this.RectDrawY))
         pop()
       }
-      
+
     } else {
       this.RectDrawX = null
       this.RectDrawY = null
@@ -124,6 +139,41 @@ class Editor {
         pop()
       }
     }
+
+
+
+    if (this.rectDeleteMode){
+      let closest = 0
+      let closestDist = 1000000000000
+      var ind = null
+      for (var i=0;i<bodyData.length;i++){
+        var scales = createVector(bodyData[i][2], bodyData[i][3])
+        var pos = createVector(bodyData[i][0], bodyData[i][1])
+
+        if (mouseX > pos.x && mouseX < pos.x + scales.x && mouseY > pos.y && mouseY < pos.y + scales.y){
+          closest = i
+        }
+
+      }
+
+      if (bodyData.length > 0) {
+        push()
+        fill(255, 255, 0, 50)
+        rectMode(CORNER)
+        rect(bodyData[closest][0], bodyData[closest][1], bodyData[closest][2], bodyData[closest][3])
+        pop()
+
+      }
+    }
+
+
+
+
+
+
+
+
+
     // Joint stuff-------------------
     if (editor.jointBody.length % 2 != 0 || editor.jointBody.length == 0 || editor.jointBody.length / editor.jointAnchorLocation.length == 2) {
 
@@ -248,6 +298,7 @@ class Editor {
 
   addShitToWorld() {
     var lowestY = 0
+    editor.rectDeleteMode = false
     arrayCopy(bodyData, bodyCopy)
 
 
@@ -263,6 +314,7 @@ class Editor {
     editor.ClearButton.remove()
     editor.ToggleDrawModeButton.remove()
     editor.EvolveButton.remove()
+    editor.DeletButton.remove()
 
     for (let i = 0; i < bodyData.length; i++) {
       editor.bodies.push(makeBox(editor.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, bodyData[i][2] / 2, bodyData[i][3] / 2, 1, 0.3, 0.1, 1))
@@ -419,6 +471,20 @@ class Editor {
       temps++
     }
   }
+
+  rectDelMode(){
+    editor.rectDeleteMode = !(editor.rectDeleteMode)
+    if (editor.rectDeleteMode){
+      editor.DeletButton.remove()
+      editor.DeletButton = editor.makeButton("Back", [255, 0, 255], 510, 10, 100, 50, 19)
+      editor.DeletButton.mousePressed(editor.rectDelMode)
+    }
+    else{
+      editor.DeletButton.remove()
+      editor.DeletButton = editor.makeButton("Delete Mode", [255, 0, 255], 510, 10, 100, 50, 19)
+      editor.DeletButton.mousePressed(editor.rectDelMode)
+    }
+  }
 }
 
 function mouseClicked() {
@@ -426,7 +492,7 @@ function mouseClicked() {
     return
   }
   var cheesecakes = false
-  if (editor.RectDraw && editor.rectDrawFlag) {
+  if (editor.RectDraw && editor.rectDrawFlag && !editor.rectDeleteMode) {
     if (mouseX - editor.RectDrawX > 1 && mouseY - editor.RectDrawY > 1){
       bodyData.push([editor.RectDrawX, editor.RectDrawY, mouseX - editor.RectDrawX, mouseY - editor.RectDrawY, editor.id])
       editor.RectDraw = false
@@ -436,14 +502,65 @@ function mouseClicked() {
     }
   }
 
-  if (editor.RectDrawing && !editor.rectDrawFlag && !cheesecakes){
+  if (editor.RectDrawing && !editor.rectDrawFlag && !cheesecakes && !editor.rectDeleteMode){
     editor.rectDrawFlag = true
     editor.RectDraw = true
     editor.RectDrawX = mouseX
     editor.RectDrawY = mouseY
   }
+
+  if (editor.rectDeleteMode){
+    let closest = 0
+    let closestDist = 1000000000000
+    var ind = null
+    for (var i=0;i<bodyData.length;i++){
+      var scales = createVector(bodyData[i][2], bodyData[i][3])
+      var pos = createVector(bodyData[i][0], bodyData[i][1])
+
+      if (mouseX > pos.x && mouseX < pos.x + scales.x && mouseY > pos.y && mouseY < pos.y + scales.y){
+        closest = i
+      }
+
+    }
+
+
+    var copyOfJoint =  []
+    //console.log(bodyData)
+    bodyData.splice(closest, 1)
+    console.log(closest)
+    for (var i=0;i<editor.jointBody.length;i+=2){
+      copyOfJoint.push([i, i+1])
+    }
+
+    for (var i=copyOfJoint.length-1;i>=0;i--){
+      if (copyOfJoint[i][0] == closest || copyOfJoint[i][1] == closest){
+        copyOfJoint.splice(i, 1)
+        editor.jointAnchorLocation.splice(i, 1)
+      }
+    }
+
+    editor.jointBody = []
+    for (var i=0;i<copyOfJoint.length;i++){
+      editor.jointBody.push(copyOfJoint[i][0])
+      editor.jointBody.push(copyOfJoint[i][1])
+    }
+
+
+
+
+    editor.id = 0
+
+    for (var i=0;i<bodyData.length;i++){
+      bodyData[i][4] = editor.id
+
+      editor.id++
+    }
+  }
+
+
+
   // Joint
-  if (!editor.jointLimitMode){
+  if (!editor.jointLimitMode && !editor.rectDeleteMode){
     if (editor.jointDraw) {
       let closest = 0
       let closestDist = 1000000000000
@@ -548,18 +665,16 @@ function keyPressed() {
   if (mouseY < 70 || editor == null) {
     return
   }
-  if (editor.RectDrawing) {
-    if (keyCode === 82) { // R
-      editor.RectDraw = true
-      editor.RectDrawX = mouseX
-      editor.RectDrawY = mouseY
-    }
-  }
+
   if (keyCode === 90) { // Z
     editor.ridLastPieceOfShit()
   }
   if (keyCode === 84) { // T
     editor.toggleMode()
+  }
+
+  if (keyCode == 81){
+    editor.rectDelMode()
   }
 
   if (editor.jointLimitMode){
@@ -568,10 +683,7 @@ function keyPressed() {
       editor.jointLimitMode = false
 
     }
-    if (keyCode == 78){
-      jointLimits.push([1, 10])
-      editor.jointLimitMode = false
-    }
+
   }
 }
 
