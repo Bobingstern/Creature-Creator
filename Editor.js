@@ -34,6 +34,7 @@ class Editor {
     this.mouseJoint = 0
     this.MouseJoint = 0
     this.fakeBodyData = []
+    this.rectDrawFlag = false
 
 
   }
@@ -80,17 +81,28 @@ class Editor {
 
   show() {
     // Rect stuff
+    if (this.RectDrawing){
+      textSize(20)
+      fill(255, 0, 0)
+      text("Click to make a starting point for your rectangle and move your mouse\nIt must got from left to right or it will not work, click to confirm the placement", 50, 100)
+    }
+
+
     if (this.RectDraw) {
-      push()
-      fill(255, 255, 255, 50)
-      rectMode(CORNER)
-      rect(this.RectDrawX, this.RectDrawY, (mouseX - this.RectDrawX), (mouseY - this.RectDrawY))
-      pop()
+      if (mouseX - editor.RectDrawX > 10 && mouseY - editor.RectDrawY > 10){
+        push()
+        fill(255, 255, 255, 50)
+        rectMode(CORNER)
+        rect(this.RectDrawX, this.RectDrawY, (mouseX - this.RectDrawX), (mouseY - this.RectDrawY))
+        pop()
+      }
+      
     } else {
       this.RectDrawX = null
       this.RectDrawY = null
     }
     if (this.drawMode) {
+
       for (let i = 0; i < bodyData.length; i++) {
         push()
         fill(255, 255, 255, 255)
@@ -410,13 +422,25 @@ class Editor {
 }
 
 function mouseClicked() {
-  if (mouseY < 70 || editor == null || editor.inSim) {
+  if (mouseY < 100 || editor == null || editor.inSim) {
     return
   }
-  if (editor.RectDraw) {
-    bodyData.push([editor.RectDrawX, editor.RectDrawY, mouseX - editor.RectDrawX, mouseY - editor.RectDrawY, editor.id])
-    editor.RectDraw = false
-    editor.id++
+  var cheesecakes = false
+  if (editor.RectDraw && editor.rectDrawFlag) {
+    if (mouseX - editor.RectDrawX > 1 && mouseY - editor.RectDrawY > 1){
+      bodyData.push([editor.RectDrawX, editor.RectDrawY, mouseX - editor.RectDrawX, mouseY - editor.RectDrawY, editor.id])
+      editor.RectDraw = false
+      editor.rectDrawFlag = false
+      cheesecakes = true
+      editor.id++
+    }
+  }
+
+  if (editor.RectDrawing && !editor.rectDrawFlag && !cheesecakes){
+    editor.rectDrawFlag = true
+    editor.RectDraw = true
+    editor.RectDrawX = mouseX
+    editor.RectDrawY = mouseY
   }
   // Joint
   if (!editor.jointLimitMode){
