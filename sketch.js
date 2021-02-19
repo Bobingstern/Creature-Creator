@@ -52,6 +52,12 @@ let jointLimits = []
 let SCALE = 30
 let WORLD
 let offset
+let offBeg
+let lazerSpeed = 1
+let bodyCopy = []
+
+let lUp
+let lDown
 
 function makeBox(world, bodyType, x, y, w, h, density, friction, res, mass, isSens) {
   let fixDef = new b2FixtureDef();
@@ -93,9 +99,13 @@ function getBest() {
 function setup() {
   window.canvas = createCanvas(1280, 720);
   frameRate(60)
-  
+
   editor = new Editor(evolve)
   offset = createVector(0, 0)
+  lUp = createButton("Lazer Speed+")
+  lUp.mousePressed(function(){lazerSpeed+=0.5})
+  lDown = createButton("Lazer Speed-")
+  lDown.mousePressed(function(){lazerSpeed-=0.5})
 }
 
 function draw() {
@@ -113,25 +123,29 @@ function draw() {
       showHumanPlaying();
     } else if (runBest) {  // if replaying the best ever game
       showBestEverPlayer();
-      console.log("best")
+
     } else {  //if just evolving normally
       if (!(population.done())) {  //if any players are alive then update them
         population.updateAlive();
       } else {  //all dead
         //genetic algorithm
-        offset.x = 0
+        offset.x = offBeg
         population.naturalSelection();
       }
     }
 
 
     let bestPlayer = getBest()
+
+
     if (!(bestPlayer == null)) {
+      text("Speed of best Player: "+bestPlayer.fps, 500, 100)
+      text("Lazer Speed: "+lazerSpeed, 800, 150)
       push()
       let easing = 0.05;
       let targetX = -1 * bestPlayer.bodies[0].GetPosition().x * SCALE+500;
       let dx = targetX - offset.x;
-      if (targetX*-1 > 500){
+      if (targetX*-1 > 400){
 
         offset.x += dx * easing;
       }
@@ -139,7 +153,7 @@ function draw() {
 
       translate(offset.x, 0)
       fill(0, 0, 0)
-      for (var i = 0; i < 1000; i++) {
+      for (var i = -1000; i < 1000; i++) {
         //text(i*10, i*300, 100)
         fill(0)
         rect(i * 20, height - 20, 10, 20)
@@ -165,7 +179,8 @@ function draw() {
 function startEvo(){
   population = new Population(200);
   started = true
-  console.log('cheese')
+  offBeg = population.players[0].bodies[0].GetPosition().x*SCALE-400
+  offset.x = offBeg
 }
 
 function showBestPlayersForEachGeneration() {

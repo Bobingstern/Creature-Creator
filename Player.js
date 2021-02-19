@@ -15,12 +15,21 @@ class Player {
     this.joints = []
     this.bodyScales = []
     this.downScalar = 2
-    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000, 20, 1, 0.3, 0.1, 1)
-    this.groundWidth = width
-    this.groundHeight = 20
-    this.speed = 200
+
+    this.speed = 300
     this.lazer = createVector(0, 0)
     this.idiotJoints = []
+    this.fps = 0
+    this.oldx = 1
+    this.time = 0
+    this.interOff = 0
+    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 0.3, 0.1, 1)
+    this.groundWidth = width*10000000
+    this.groundHeight = 20
+
+    var lowestY = 0
+    arrayCopy(bodyData, bodyCopy)
+
 
     for (let i = 0; i < bodyData.length; i++) {
       this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, 1, 0.3, 0.1, 1))
@@ -59,7 +68,13 @@ class Player {
     this.genomeOutputs = this.joints.length;
     this.brain = new Genome(this.genomeInputs, this.genomeOutputs);
 
-    this.lazer.x = this.bodies[0].GetPosition().x*SCALE-200
+    this.lazer.x = this.bodies[0].GetPosition().x*SCALE-400
+
+
+    bodyData = []
+    arrayCopy(bodyCopy, bodyData)
+
+
 
   }
 
@@ -88,14 +103,24 @@ class Player {
   }
 
   update() {
-    this.lazer.x += 1
+    this.lazer.x += lazerSpeed
 
     if (!(this.dead)) {
 
       this.world.Step(1 / 60, 10, 10)
+
+
       this.fitness += 0.1
-      this.score = this.fitness
+      this.score = this.bodies[0].GetPosition().x
       this.lifespan += 0.001
+      this.time += 1
+
+
+        if (this.oldx != 1){
+          this.fps = this.bodies[0].GetPosition().x*SCALE - this.oldx
+        }
+        this.oldx = this.bodies[0].GetPosition().x*SCALE
+
       for (let i = 0; i < this.decision.length; i++) {
         if (this.decision[i] > 0.5) {
           this.rotateLeft(this.joints[i])

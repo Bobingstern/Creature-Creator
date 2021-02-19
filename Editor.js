@@ -33,6 +33,7 @@ class Editor {
     this.curLeftAngle = -45
     this.mouseJoint = 0
     this.MouseJoint = 0
+    this.fakeBodyData = []
 
 
   }
@@ -121,15 +122,26 @@ class Editor {
       pop()
     }
     if (this.jointDraw && !(this.inSim)) {
+      // if (editor.jointBody.length / editor.jointAnchorLocation.length == 2){
+      //   push()
+      //   fill(255, 255, 0, 80)
+      //   rect(bodyData[editor.jointBody[editor.jointBody.length-1]][0], bodyData[editor.jointBody[editor.jointBody.length-1]][1], bodyData[editor.jointBody[editor.jointBody.length-1]][2], bodyData[editor.jointBody[editor.jointBody.length-1]][3])
+      //
+      //   pop()
+      // }
       let closest = 0
       let closestDist = 1000000000000
-      for (let i = 0; i < bodyData.length; i++) {
-        let d = dist(bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, mouseX, mouseY)
-        if (d < closestDist) {
-          closestDist = d
+      var ind = null
+      for (var i=0;i<bodyData.length;i++){
+        var scales = createVector(bodyData[i][2], bodyData[i][3])
+        var pos = createVector(bodyData[i][0], bodyData[i][1])
+
+        if (mouseX > pos.x && mouseX < pos.x + scales.x && mouseY > pos.y && mouseY < pos.y + scales.y){
           closest = i
         }
+
       }
+
 
       for (var i = 0; i < this.jointAnchorLocation.length; i++) {
         push()
@@ -143,6 +155,7 @@ class Editor {
         rectMode(CORNER)
         rect(bodyData[closest][0], bodyData[closest][1], bodyData[closest][2], bodyData[closest][3])
         pop()
+
       }
     }
 
@@ -222,6 +235,12 @@ class Editor {
   }
 
   addShitToWorld() {
+    var lowestY = 0
+    arrayCopy(bodyData, bodyCopy)
+
+
+    //--------------------------------TODO: FIX THE OFFSET BUG THING
+
     editor.inSim = true
     editor.TestButton.remove()
     if (!(editor.evolving)) {
@@ -266,6 +285,8 @@ class Editor {
       jointDef.collideConnected = false
       editor.joints.push(editor.world.CreateJoint(jointDef))
     }
+    bodyData = []
+    arrayCopy(bodyCopy, bodyData)
   }
 
 
@@ -402,12 +423,15 @@ function mouseClicked() {
     if (editor.jointDraw) {
       let closest = 0
       let closestDist = 1000000000000
-      for (let i = 0; i < bodyData.length; i++) {
-        let d = dist(bodyData[i][0] + bodyData[i][2] / 2, bodyData[i][1] + bodyData[i][3] / 2, mouseX, mouseY)
-        if (d < closestDist) {
-          closestDist = d
+      var ind = null
+      for (var i=0;i<bodyData.length;i++){
+        var scales = createVector(bodyData[i][2], bodyData[i][3])
+        var pos = createVector(bodyData[i][0], bodyData[i][1])
+
+        if (mouseX > pos.x && mouseX < pos.x + scales.x && mouseY > pos.y && mouseY < pos.y + scales.y){
           closest = i
         }
+
       }
       push()
       fill(255, 255, 255)
@@ -416,7 +440,9 @@ function mouseClicked() {
       pop()
       if (editor.jointBody.length % 2 != 0 || editor.jointBody.length == 0 || editor.jointBody.length / editor.jointAnchorLocation.length == 2) {
         let id = bodyData[closest][4]
-        editor.jointBody.push(id)
+        if (editor.jointBody[editor.jointBody.length-1] != id){
+          editor.jointBody.push(id)
+        }
 
       } else {
         editor.jointAnchorLocation.push([mouseX, mouseY])
