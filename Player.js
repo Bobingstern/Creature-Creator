@@ -27,8 +27,12 @@ class Player {
     //console.log(height-offY)
     console.log()
     this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 0.3, 0.1, 1)
+    this.ground.SetUserData("ground")
     this.groundWidth = width*10000000
     this.groundHeight = 20
+
+    this.ground2 = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 0.3, 0.1, 1)
+
 
     var lowestY = 0
     arrayCopy(bodyData, bodyCopy)
@@ -74,9 +78,47 @@ class Player {
 
     this.lazer.x = this.bodies[0].GetPosition().x*SCALE-400
 
+    //console.log(DeadShots)
+    for (var i=0;i<DeadShots.length;i++){
+      this.bodies[DeadShots[i]].SetUserData("body")
+
+    }
+
 
     bodyData = []
+
     arrayCopy(bodyCopy, bodyData)
+
+
+    ///-----------
+    this.listener = new Box2D.Dynamics.b2ContactListener;
+    this.listener.dead = false
+    this.world.SetContactListener(this.listener);
+
+    this.listener.BeginContact = function(contact) {
+
+      // console.log(contact.GetFixtureA().GetBody().GetUserData());
+      let fixA = contact.GetFixtureA().GetBody().GetUserData()
+      let fixB = contact.GetFixtureB().GetBody().GetUserData()
+
+      if (fixA == "ground" && fixB == "body" || fixA == "body" && fixB == "ground") {
+
+
+        this.dead = true
+
+
+      }
+
+
+    }
+
+    this.listener.EndContact = function(contact) {
+      // console.log(contact.GetFixtureA().GetBody().GetUserData());
+    }
+
+    this.listener.PreSolve = function() {
+
+    }
 
 
 
@@ -108,7 +150,9 @@ class Player {
 
   update() {
     this.lazer.x += lazerSpeed
-
+    if (this.listener.dead){
+      this.dead = true
+    }
     if (!(this.dead)) {
 
       this.world.Step(1 / 60, 10, 10)

@@ -58,6 +58,8 @@ let bodyCopy = []
 let offY = 0
 let lUp
 let lDown
+let DeadShots = []
+
 
 function makeBox(world, bodyType, x, y, w, h, density, friction, res, mass, isSens) {
   let fixDef = new b2FixtureDef();
@@ -87,7 +89,7 @@ function getBest() {
   let best_player = null
   let best_fitness = 0
   for (var i = 0; i < population.players.length; i++) {
-    if (population.players[i].fitness > best_fitness && !(population.players[i].dead)) {
+    if (population.players[i].score > best_fitness && !(population.players[i].dead)) {
       best_fitness = population.players[i].fitness
       best_player = population.players[i]
     }

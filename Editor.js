@@ -36,6 +36,10 @@ class Editor {
     this.fakeBodyData = []
     this.rectDrawFlag = false
     this.rectDeleteMode = false
+    this.deathMode = false
+    this.DeadShots = []
+
+    ///----------------------TODO: ADD DEATH MODE BUTTON
 
 
   }
@@ -64,7 +68,7 @@ class Editor {
     editor.ToggleDrawModeButton.remove()
     editor.EvolveButton.remove()
     editor.addJointsUsingMathAndShit()
-
+    editor.deathMode = false
 
 
     editor.RectDrawing = false
@@ -142,7 +146,7 @@ class Editor {
 
 
 
-    if (this.rectDeleteMode){
+    if (this.rectDeleteMode || this.deathMode){
       let closest = 0
       let closestDist = 1000000000000
       var ind = null
@@ -492,7 +496,7 @@ function mouseClicked() {
     return
   }
   var cheesecakes = false
-  if (editor.RectDraw && editor.rectDrawFlag && !editor.rectDeleteMode) {
+  if (editor.RectDraw && editor.rectDrawFlag && !editor.rectDeleteMode && !editor.deathMode) {
     if (mouseX - editor.RectDrawX > 1 && mouseY - editor.RectDrawY > 1){
       bodyData.push([editor.RectDrawX, editor.RectDrawY, mouseX - editor.RectDrawX, mouseY - editor.RectDrawY, editor.id])
       editor.RectDraw = false
@@ -502,7 +506,7 @@ function mouseClicked() {
     }
   }
 
-  if (editor.RectDrawing && !editor.rectDrawFlag && !cheesecakes && !editor.rectDeleteMode){
+  if (editor.RectDrawing && !editor.rectDrawFlag && !cheesecakes && !editor.rectDeleteMode && !editor.deathMode){
     editor.rectDrawFlag = true
     editor.RectDraw = true
     editor.RectDrawX = mouseX
@@ -558,9 +562,30 @@ function mouseClicked() {
   }
 
 
+  if (editor.deathMode){
+    let closest = 0
+    let closestDist = 1000000000000
+    var ind = null
+    for (var i=0;i<bodyData.length;i++){
+      var scales = createVector(bodyData[i][2], bodyData[i][3])
+      var pos = createVector(bodyData[i][0], bodyData[i][1])
+
+      if (mouseX > pos.x && mouseX < pos.x + scales.x && mouseY > pos.y && mouseY < pos.y + scales.y){
+        closest = i
+      }
+
+    }
+
+    DeadShots.push(closest)
+    console.log(DeadShots)
+
+
+  }
+
+
 
   // Joint
-  if (!editor.jointLimitMode && !editor.rectDeleteMode){
+  if (!editor.jointLimitMode && !editor.rectDeleteMode && !editor.deathMode){
     if (editor.jointDraw) {
       let closest = 0
       let closestDist = 1000000000000
@@ -673,8 +698,11 @@ function keyPressed() {
     editor.toggleMode()
   }
 
-  if (keyCode == 81){
+  if (keyCode === 81){
     editor.rectDelMode()
+  }
+  if (keyCode === 69){
+    editor.deathMode = true
   }
 
   if (editor.jointLimitMode){

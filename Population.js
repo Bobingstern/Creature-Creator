@@ -15,7 +15,7 @@ class Population {
 
     for (var i = 0; i < size; i++) {
       this.players.push(new Player());
-      this.players[this.players.length - 1].brain.mutate(this.innovationHistory);
+      this.players[this.players.length - 1].brain.fullyConnect(this.innovationHistory);
       this.players[this.players.length - 1].brain.generateNetwork();
     }
   }
