@@ -26,12 +26,12 @@ class Player {
     //270 and 360
     //console.log(height-offY)
     console.log()
-    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 0.3, 0.1, 1)
+    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 10000000, 0.1, 1)
     this.ground.SetUserData("ground")
     this.groundWidth = width*10000000
     this.groundHeight = 20
 
-    this.ground2 = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 0.3, 0.1, 1)
+    this.ground2 = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 10000000, 0.1, 1)
 
 
     var lowestY = 0
