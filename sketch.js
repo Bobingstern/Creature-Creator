@@ -62,7 +62,7 @@ let DeadShots = []
 let actualBest
 let worlds = []
 
-var numberOfWorlds = 10;
+var numberOfWorlds = 5;
 var playersPerWorld = 100;
 var playersInEachWorld = [];
 
@@ -131,7 +131,7 @@ function getBest() {
   let best_player = null
   let best_fitness = 0
   for (var i = 0; i < population.players.length; i++) {
-    if (population.players[i].score > best_fitness && !(population.players[i].dead)) {
+    if (population.players[i].score > best_fitness && !(population.players[i].dead) && population.playerInBatch(population.players[i])) {
       best_fitness = population.players[i].fitness
       best_player = population.players[i]
     }
@@ -182,6 +182,9 @@ function draw() {
       // for (var w of worlds) {
       //   w.Step(1 / 30, 10, 10);
       // }
+      if (actualBest){
+        getBest().show()
+      }
       population.stepWorldsInBatch();
       population.updateAlive();
     } else { //all dead
@@ -189,13 +192,16 @@ function draw() {
       // grounds[0].show()
       population.naturalSelection();
 
-    }
+      }
+
     }
 
 
 
 
     let bestPlayer = getBest()
+
+
 
 
     if (!(bestPlayer == null)) {
@@ -329,7 +335,7 @@ function writeInfo() {
   textAlign(LEFT);
   textSize(30);
   text("Gen: " + population.gen, 300, 50);
-  text("Batch No: " + population.batchNo, 300, 100);
+  text("Batch No: " + population.batchNo+"/10", 300, 100);
 
 
 

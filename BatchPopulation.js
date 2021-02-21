@@ -52,7 +52,7 @@ class BatchPopulation {
           this.players[i].look(); //get inputs for brain
           this.players[i].think(); //use outputs from neural network
           this.players[i].update(); //move the player according to the outputs from the neural network
-          if (!showNothing && (!showBest || i == 0)) {
+          if (!showNothing && (!showBest || i == 0) && !actualBest) {
             this.players[i].show();
           }
           if (this.players[i].score > this.globalBestScore) {

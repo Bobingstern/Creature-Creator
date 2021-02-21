@@ -58,10 +58,13 @@ class Editor {
     this.ClearButton.mousePressed(this.ridWorldOfShit)
     this.DeletButton = this.makeButton("Delete Mode", [255, 0, 255], 10, 260, 100, 50, 19)
     this.DeletButton.mousePressed(this.rectDelMode)
+    this.FloorButton = this.makeButton("Death on Floor Mode", [255, 255, 255], 10, 310, 100, 50, 15)
+    this.FloorButton.mousePressed(this.deathFloorButton)
 
   }
 
   evolve() {
+    editor.FloorButton.remove()
     editor.DeletButton.remove()
     editor.TestButton.remove()
     editor.UndoButton.remove()
@@ -81,13 +84,17 @@ class Editor {
 
 
 
-
-
-
-
-
-
   }
+
+
+
+  deathFloorButton(){
+    editor.deathMode = !(editor.deathMode)
+    editor.rectDeleteMode = false
+    editor.jointDraw = false
+  }
+
+
 
   show() {
     // Rect stuff
@@ -95,27 +102,60 @@ class Editor {
 
 
 
-    if (this.RectDrawing && !this.rectDeleteMode){
+    if (this.RectDrawing && !this.rectDeleteMode && !this.deathMode){
       textSize(20)
       fill(255, 0, 0)
       text("Click to make a starting point for your rectangle and move your mouse\nIt must got from left to right or it will not work, click to confirm the placement", 150, 30)
     }
 
-    if (this.rectDeleteMode){
+    if (this.rectDeleteMode && !this.deathMode){
       textSize(20)
       fill(255, 0, 0)
       text("Delete Mode, Figure it out", 150, 30)
     }
 
+    if (this.deathMode){
+      text("Choose a body that will kill the creature when it touches the ground", 150, 30)
+    }
+
 
     if (this.RectDraw && !this.rectDeleteMode) {
-      if (mouseX - editor.RectDrawX > 10 && mouseY - editor.RectDrawY > 10){
-        push()
-        fill(255, 255, 255, 50)
-        rectMode(CORNER)
-        rect(this.RectDrawX, this.RectDrawY, (mouseX - this.RectDrawX), (mouseY - this.RectDrawY))
-        pop()
-      }
+
+
+
+        if (editor.RectDraw && editor.rectDrawFlag && !editor.rectDeleteMode && !editor.deathMode) {
+          if (mouseX - editor.RectDrawX > 1 && mouseY - editor.RectDrawY > 1){
+            push()
+            fill(255, 255, 255, 50)
+            rectMode(CORNER)
+            rect(this.RectDrawX, this.RectDrawY, (mouseX - this.RectDrawX), (mouseY - this.RectDrawY))
+            pop()
+          }
+          else{
+            var originX = editor.RectDrawX
+            var originY = editor.RectDrawY
+            var toDrawPointX = (mouseX - editor.RectDrawX)
+            var toDrawPointX = (mouseY - editor.RectDrawY)
+
+
+            originX = mouseX
+            originY = mouseY
+
+            var x = originX
+            var y = originY
+            var w = editor.RectDrawX-originX
+            var h = editor.RectDrawY-originY
+
+            push()
+            fill(255, 255, 255, 50)
+            rectMode(CORNER)
+            rect(x, y, w, h)
+            pop()
+
+          }
+        }
+
+
 
     } else {
       this.RectDrawX = null
@@ -493,13 +533,35 @@ class Editor {
 }
 
 function mouseClicked() {
-  if (mouseY < 100 || editor == null || editor.inSim) {
+  if (mouseX < 100 || editor == null || editor.inSim) {
     return
   }
   var cheesecakes = false
   if (editor.RectDraw && editor.rectDrawFlag && !editor.rectDeleteMode && !editor.deathMode) {
     if (mouseX - editor.RectDrawX > 1 && mouseY - editor.RectDrawY > 1){
       bodyData.push([editor.RectDrawX, editor.RectDrawY, mouseX - editor.RectDrawX, mouseY - editor.RectDrawY, editor.id])
+      editor.RectDraw = false
+      editor.rectDrawFlag = false
+      cheesecakes = true
+      editor.id++
+    }
+    else{
+      var originX = editor.RectDrawX
+      var originY = editor.RectDrawY
+      var toDrawPointX = (mouseX - editor.RectDrawX)
+      var toDrawPointX = (mouseY - editor.RectDrawY)
+
+
+      originX = mouseX
+      originY = mouseY
+
+      var x = originX
+      var y = originY
+      var w = editor.RectDrawX-originX
+      var h = editor.RectDrawY-originY
+
+
+      bodyData.push([x, y, w, h, editor.id])
       editor.RectDraw = false
       editor.rectDrawFlag = false
       cheesecakes = true

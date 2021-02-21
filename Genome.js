@@ -312,14 +312,14 @@ class Genome {
 
     //5% of the time add a new connection
     var rand2 = random(1);
-    if (rand2 < 0.05) {
+    if (rand2 < 0.2) {
 
       this.addConnection(innovationHistory);
     }
 
     //1% of the time add a node
     var rand3 = random(1);
-    if (rand3 < 0.01) {
+    if (rand3 < 0.1) {
 
       this.addNode(innovationHistory);
     }

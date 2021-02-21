@@ -16,7 +16,7 @@ class Player {
     this.bodies = []
     this.joints = []
     this.bodyScales = []
-    this.downScalar = 2
+    this.downScalar = 1.3
 
     this.speed = 5
     this.lazer = createVector(0, 0)
@@ -48,8 +48,8 @@ class Player {
 
 
     for (let i = 0; i < bodyData.length; i++) {
-
-      this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, (bodyData[i][1] + bodyData[i][3] / 2), (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, 1, 0.8, 0.1, 1))
+      var area = ((bodyData[i][2] / 2)/this.downScalar) * ((bodyData[i][3] / 2)/this.downScalar)
+      this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, (bodyData[i][1] + bodyData[i][3] / 2), (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, area/SCALE, 100, 0.1, 1))
       this.bodyScales.push([(bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar])
     }
 
@@ -174,7 +174,7 @@ class Player {
 
       this.fitness = this.bodies[0].GetPosition().x
       this.score = this.bodies[0].GetPosition().x
-      this.lifespan += 0.001
+      this.lifespan ++
       this.time += 1
 
 
@@ -249,6 +249,12 @@ class Player {
 
 
       //----------------------------------
+
+
+
+
+
+
     }
 
     for (var i = 0 ; i < this.bodies.length; i++) {
@@ -294,19 +300,19 @@ class Player {
     let jointAngles = [];
     let inputJointSpeeds = [];
     for (var j of this.joints) {
-        if (j.type === "revolute") {
+
             if (j.limitRevolution) {// if limited then map 0 and 1 to the limits
-                let upperLim = j.joint.GetUpperLimit();
-                let lowerLim = j.joint.GetLowerLimit();
+                let upperLim = j.GetUpperLimit();
+                let lowerLim = j.GetLowerLimit();
                 let jointAngle = constrain(j.joint.GetJointAngle(), lowerLim, upperLim);//make sure the angle is within the limit (sometimes the physics engine can be a little fucky)
                 this.vision.push(map(jointAngle, lowerLim, upperLim, 0, 1));
             } else {
-                jointAngles.push(j.joint.GetJointAngle());
+                jointAngles.push(j.GetJointAngle());
             }
 
-            inputJointSpeeds.push(j.joint.GetJointSpeed());
+            inputJointSpeeds.push(j.GetJointSpeed());
 
-        }
+
     }
 
 
@@ -324,8 +330,9 @@ class Player {
     for (var j of inputJointSpeeds) {
         let val = j;
         val = val / this.maxJointSpeed;
-        // this.vision.push(val);
+        this.vision.push(val);
     }
+
 
 
     //-------------------------------------------if touching ground
@@ -417,7 +424,6 @@ class Player {
         averageAngularVelRelativeToMass += bodyMasses[i] * val / totalMass;
     }
     this.vision.push(map(averageAngularVelRelativeToMass, -1.5, 1.5, -1, 1));
-    //console.log(this.vision)
 
   }
 
