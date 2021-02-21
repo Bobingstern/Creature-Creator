@@ -10,7 +10,7 @@ class Player {
     this.dead = false;
     this.score = 0;
     this.gen = 0;
-    this.world = new b2World(new b2Vec2(0, 50))
+    this.world = getFreeWorld()
     this.bodies = []
     this.joints = []
     this.bodyScales = []
@@ -25,13 +25,15 @@ class Player {
     this.interOff = 0
     //270 and 360
     //console.log(height-offY)
-    console.log()
-    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 10000000, 0.1, 1)
+
+    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 0.3, 0.1, 2, 10)
     this.ground.SetUserData("ground")
+
+    //this.ground.SetFilterData()
     this.groundWidth = width*10000000
     this.groundHeight = 20
 
-    this.ground2 = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 10000000, 0.1, 1)
+    this.ground2 = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 10000000000, 0.3, 0.1, 1)
 
 
     var lowestY = 0
@@ -79,9 +81,11 @@ class Player {
     this.lazer.x = this.bodies[0].GetPosition().x*SCALE-400
 
     //console.log(DeadShots)
-    for (var i=0;i<DeadShots.length;i++){
-      this.bodies[DeadShots[i]].SetUserData("body")
+    if (DeadShots.length > 0){
+      for (var i=0;i<DeadShots.length;i++){
+        this.bodies[DeadShots[i]].SetUserData("body")
 
+      }
     }
 
 
@@ -102,7 +106,6 @@ class Player {
       let fixB = contact.GetFixtureB().GetBody().GetUserData()
 
       if (fixA == "ground" && fixB == "body" || fixA == "body" && fixB == "ground") {
-
 
         this.dead = true
 
@@ -155,10 +158,10 @@ class Player {
     }
     if (!(this.dead)) {
 
-      this.world.Step(1 / 60, 10, 10)
+      //this.world.Step(1 / 60, 10, 10)
 
 
-      this.fitness += 0.1
+      this.fitness = this.bodies[0].GetPosition().x
       this.score = this.bodies[0].GetPosition().x
       this.lifespan += 0.001
       this.time += 1

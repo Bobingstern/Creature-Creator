@@ -59,6 +59,44 @@ let offY = 0
 let lUp
 let lDown
 let DeadShots = []
+let actualBest
+let worlds = []
+
+var numberOfWorlds = 10;
+var playersPerWorld = 100;
+var playersInEachWorld = [];
+
+
+function clearWorlds() {
+  for (var i = 0; i < playersInEachWorld.length; i++) {
+    playersInEachWorld[i] = 0;
+  }
+}
+
+function getFreeWorld() {
+  worlds.push(new b2World(new b2Vec2(0, 50), true))
+  return worlds[worlds.length-1]
+}
+
+function newWorlds() {
+  console.log("New WOrld");
+
+worlds = []
+
+
+  population.bestScore = 0; //the score of the best ever player
+  population.globalBestScore = 0;
+
+
+  //
+  // ground = new Ground(world);
+  // ground.cloneFrom(groundTemplate);
+  // ground.setBodies(world); //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
+  // world.SetContactListener(listener);
+}
+
+
+
 
 
 function makeBox(world, bodyType, x, y, w, h, density, friction, res, mass, isSens) {
@@ -74,7 +112,11 @@ function makeBox(world, bodyType, x, y, w, h, density, friction, res, mass, isSe
   bodyDef.position.y = y / SCALE
   fixDef.shape = new b2PolygonShape()
   fixDef.shape.SetAsBox(w / SCALE, h / SCALE)
-  fixDef.filter.group = isSens
+  var filtData = new b2FilterData();
+    // filtData.groupIndex = -1;
+
+
+
   let body = world.CreateBody(bodyDef)
   body.CreateFixture(fixDef)
   return body
@@ -102,6 +144,15 @@ function setup() {
   window.canvas = createCanvas(1280, 720);
   frameRate(60)
 
+  for (var i = 0; i < numberOfWorlds; i++) {
+   let tempWorld = new b2World(new b2Vec2(0, 50), true);
+
+   // tempWorld.SetContactListener(listener2);
+
+   worlds.push(tempWorld);
+   playersInEachWorld.push(0);
+ }
+
   editor = new Editor(evolve)
   offset = createVector(0, 0)
   lUp = createButton("Lazer Speed+")
@@ -127,22 +178,29 @@ function draw() {
       showBestEverPlayer();
 
     } else {  //if just evolving normally
-      if (!(population.done())) {  //if any players are alive then update them
-        population.updateAlive();
-      } else {  //all dead
-        //genetic algorithm
-        offset.x = offBeg
-        population.naturalSelection();
-      }
+      if (!population.done()) { //if any players are alive then update them
+      // for (var w of worlds) {
+      //   w.Step(1 / 30, 10, 10);
+      // }
+      population.stepWorldsInBatch();
+      population.updateAlive();
+    } else { //all dead
+      //genetic algorithm
+      // grounds[0].show()
+      population.naturalSelection();
+
     }
+    }
+
+
 
 
     let bestPlayer = getBest()
 
 
     if (!(bestPlayer == null)) {
-      text("Speed of best Player: "+bestPlayer.fps, 500, 100)
-      text("Lazer Speed: "+lazerSpeed, 800, 150)
+      text("Speed of best Player: "+bestPlayer.fps, 500, 50)
+      text("Lazer Speed: "+lazerSpeed, 800, 100)
       push()
       let easing = 0.05;
       let targetX = -1 * bestPlayer.bodies[0].GetPosition().x * SCALE+500;
@@ -188,12 +246,12 @@ function startEvo(){
   offY = height-lowestY
 
 
-  population = new Population(200);
+  population = new BatchPopulation();
   started = true
 
   offBeg = population.players[0].bodies[0].GetPosition().x*SCALE-400
   offset.x = offBeg
-
+  //console.log(worlds)
 
 
 
@@ -270,6 +328,11 @@ function writeInfo() {
   fill(200);
   textAlign(LEFT);
   textSize(30);
+  text("Gen: " + population.gen, 300, 50);
+  text("Batch No: " + population.batchNo, 300, 100);
+
+
+
   if (showBestEachGen) {
     text("Score: " + genPlayerTemp.score, 650, 50);
     text("Gen: " + (genPlayerTemp.gen + 1), 1150, 50);

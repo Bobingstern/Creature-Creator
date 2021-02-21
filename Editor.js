@@ -38,6 +38,7 @@ class Editor {
     this.rectDeleteMode = false
     this.deathMode = false
     this.DeadShots = []
+    this.downScalar = 2
 
     ///----------------------TODO: ADD DEATH MODE BUTTON
 
@@ -47,15 +48,15 @@ class Editor {
   makeButtons() {
     this.TestButton = this.makeButton("Test Creature", [0, 255, 0], 10, 10, 100, 50, 19)
     this.TestButton.mousePressed(this.addShitToWorld)
-    this.EvolveButton = this.makeButton("Evolve", [255, 127, 0], 110, 10, 100, 50, 19)
+    this.EvolveButton = this.makeButton("Evolve", [255, 127, 0], 10, 60, 100, 50, 19)
     this.EvolveButton.mousePressed(this.evolve)
-    this.ToggleDrawModeButton = this.makeButton("Switch to Joint mode", [0, 127, 255], 210, 10, 100, 50, 14)
+    this.ToggleDrawModeButton = this.makeButton("Switch to Joint mode", [0, 127, 255], 10, 110, 100, 50, 14)
     this.ToggleDrawModeButton.mousePressed(this.toggleMode)
-    this.UndoButton = this.makeButton("Undo (Glitchy)", [255, 255, 0], 310, 10, 100, 50, 18)
+    this.UndoButton = this.makeButton("Undo (Glitchy)", [255, 255, 0], 10, 160, 100, 50, 18)
     this.UndoButton.mousePressed(this.ridLastPieceOfShit)
-    this.ClearButton = this.makeButton("Clear World", [255, 0, 0], 410, 10, 100, 50, 19)
+    this.ClearButton = this.makeButton("Clear World", [255, 0, 0], 10, 210, 100, 50, 19)
     this.ClearButton.mousePressed(this.ridWorldOfShit)
-    this.DeletButton = this.makeButton("Delete Mode", [255, 0, 255], 510, 10, 100, 50, 19)
+    this.DeletButton = this.makeButton("Delete Mode", [255, 0, 255], 10, 260, 100, 50, 19)
     this.DeletButton.mousePressed(this.rectDelMode)
 
   }
@@ -97,13 +98,13 @@ class Editor {
     if (this.RectDrawing && !this.rectDeleteMode){
       textSize(20)
       fill(255, 0, 0)
-      text("Click to make a starting point for your rectangle and move your mouse\nIt must got from left to right or it will not work, click to confirm the placement", 50, 100)
+      text("Click to make a starting point for your rectangle and move your mouse\nIt must got from left to right or it will not work, click to confirm the placement", 150, 30)
     }
 
     if (this.rectDeleteMode){
       textSize(20)
       fill(255, 0, 0)
-      text("Delete Mode, Figure it out", 50, 100)
+      text("Delete Mode, Figure it out", 150, 30)
     }
 
 
@@ -412,9 +413,9 @@ class Editor {
   toggleMode() {
     editor.ToggleDrawModeButton.remove()
     if (editor.RectDrawing) {
-      editor.ToggleDrawModeButton = editor.makeButton("Switch to Joint Mode", [0, 127, 255], 210, 10, 100, 50, 14)
+      editor.ToggleDrawModeButton = editor.makeButton("Switch to Joint Mode", [0, 127, 255], 10, 110, 100, 50, 14)
     } else {
-      editor.ToggleDrawModeButton = editor.makeButton("Switch to Rect Mode", [0, 127, 255], 210, 10, 100, 50, 14)
+      editor.ToggleDrawModeButton = editor.makeButton("Switch to Rect Mode", [0, 127, 255], 10, 110, 100, 50, 14)
     }
     editor.ToggleDrawModeButton.mousePressed(editor.toggleMode)
     editor.RectDrawing = !(editor.RectDrawing)
@@ -480,12 +481,12 @@ class Editor {
     editor.rectDeleteMode = !(editor.rectDeleteMode)
     if (editor.rectDeleteMode){
       editor.DeletButton.remove()
-      editor.DeletButton = editor.makeButton("Back", [255, 0, 255], 510, 10, 100, 50, 19)
+      editor.DeletButton = editor.makeButton("Back", [255, 0, 255], 10, 260, 100, 50, 19)
       editor.DeletButton.mousePressed(editor.rectDelMode)
     }
     else{
       editor.DeletButton.remove()
-      editor.DeletButton = editor.makeButton("Delete Mode", [255, 0, 255], 510, 10, 100, 50, 19)
+      editor.DeletButton = editor.makeButton("Delete Mode", [255, 0, 255], 10, 260, 100, 50, 19)
       editor.DeletButton.mousePressed(editor.rectDelMode)
     }
   }
@@ -631,7 +632,7 @@ function keyPressed() {
   switch (key) {
     case ' ':
       //toggle showBest
-      showBest = !showBest;
+      actualBest = !actualBest;
       break;
       // case '+': //speed up frame rate
       //   speed += 10;
