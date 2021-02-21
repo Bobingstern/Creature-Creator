@@ -52,7 +52,7 @@ class BatchPopulation {
           this.players[i].look(); //get inputs for brain
           this.players[i].think(); //use outputs from neural network
           this.players[i].update(); //move the player according to the outputs from the neural network
-          if (!showNothing && (!showBest || i == 0) && !actualBest) {
+          if (!showNothing && (!showBest || i == 0)) {
             this.players[i].show();
           }
           if (this.players[i].score > this.globalBestScore) {
@@ -154,10 +154,10 @@ class BatchPopulation {
     this.killStaleSpecies(); //remove this.species which haven't improved in the last 15(ish)this.generations
     this.killBadSpecies(); //kill this.species which are so bad that they cant reproduce
 
-    if (this.gensSinceNewWorld >= 0 || this.bestScore > (grounds[0].distance - 350) / 10) {
+    if (this.gensSinceNewWorld >= 0) {
       this.gensSinceNewWorld = 0;
 
-      newWorlds();
+      newWorlds()
     }
 
     // console.log("generation  " + this.gen + "  Number of mutations  " + this.innovationHistory.length + "  species:   " + this.species.length + "  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");

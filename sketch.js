@@ -182,9 +182,7 @@ function draw() {
       // for (var w of worlds) {
       //   w.Step(1 / 30, 10, 10);
       // }
-      if (actualBest){
-        getBest().show()
-      }
+      
       population.stepWorldsInBatch();
       population.updateAlive();
     } else { //all dead
