@@ -105,7 +105,7 @@ class Editor {
     if (this.RectDrawing && !this.rectDeleteMode && !this.deathMode){
       textSize(20)
       fill(255, 0, 0)
-      text("Click to make a starting point for your rectangle and move your mouse\nIt must got from left to right or it will not work, click to confirm the placement", 150, 30)
+      text("Click to make a starting point for your rectangle and move your mouse\nClick to confirm the placement", 150, 30)
     }
 
     if (this.rectDeleteMode && !this.deathMode){
