@@ -59,6 +59,9 @@ class BatchPopulation {
             this.globalBestScore = this.players[i].score;
           }
         }
+        else{
+          this.players[i].ded()
+        }
       }
     }
 
@@ -136,7 +139,7 @@ class BatchPopulation {
     // if (this.gen % 2 == 0 && playersPerWorld < 15) {
     //   playersPerWorld += 1;
     // }\
-    
+
     this.batchNo = 0;
     var previousBest = this.players[0];
     this.speciate(); //seperate the this.players varo this.species
