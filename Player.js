@@ -49,7 +49,7 @@ class Player {
 
     for (let i = 0; i < bodyData.length; i++) {
       var area = ((bodyData[i][2] / 2)/this.downScalar) * ((bodyData[i][3] / 2)/this.downScalar)
-      this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, (bodyData[i][1] + bodyData[i][3] / 2), (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, area/SCALE, 100, 0.1, 1))
+      this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, (bodyData[i][1] + bodyData[i][3] / 2), (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, 2, 100, 0.1, 1))
       this.bodyScales.push([(bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar])
     }
 
@@ -135,6 +135,15 @@ class Player {
     }
 
 
+    this.strainingPairs = [];
+
+        for (let i = 0; i < this.bodies.length; i++) {
+            for (let j = i + 1; j < this.bodies.length; j++) {
+                let strainingPair = {body1: i, body2: j, strainCount: 0};
+                this.strainingPairs.push(strainingPair);
+            }
+        }
+
 
   }
 
@@ -159,7 +168,78 @@ class Player {
   }
 
   move() {
-    //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<replace
+    let counter = 0;
+    for (var j of this.joints) {
+
+            //for each joint
+
+            let jointSpeed = this.jointSpeeds[counter];
+            let simulatedEase = false;
+            //if the joint is limited then decrease the velocity of the joint as it reaches the limits so it looks more natural
+            if (j.limitRevolution) {
+
+                let upperLim = j.joint.GetUpperLimit();
+                let lowerLim = j.joint.GetLowerLimit();
+                let jointRange = upperLim - lowerLim;
+                let jointAngle = j.joint.GetJointAngle();
+
+                //if the joint is near the limit then slow the joint speed down to simulate ease in and out
+                let previousJointSpeed = jointSpeed;
+
+                if (jointSpeed < 0) {
+                    if (jointAngle - lowerLim < 0.2 * jointRange) {
+                        if (jointAngle < lowerLim) {
+                            jointSpeed = 0;
+                            simulatedEase = true;
+                        } else {
+                            jointSpeed = map(jointAngle - lowerLim, 0, 0.2 * jointRange, this.jointSpeeds[counter], 0);
+                            simulatedEase = true;
+                        }
+                    }
+
+                } else {
+
+                    if (upperLim - jointAngle < 0.2 * jointRange) {
+                        if (upperLim < jointAngle) {
+                            jointSpeed = 0;
+                            simulatedEase = true;
+                        } else {
+                            jointSpeed = map(upperLim - jointAngle, 0, 0.2 * jointRange, 0, this.jointSpeeds[counter]);
+                            simulatedEase = true;
+                        }
+                    }
+
+
+                }
+
+            }
+
+
+            //if the joint hasnt already had simulated ease applied because its close to the limits then limit the joints acceleration so it looks more natural
+            if (!simulatedEase && Math.abs(j.GetMotorSpeed() - jointSpeed) > maxJointAcceleration) {
+                if (jointSpeed > j.GetMotorSpeed()) {
+                    jointSpeed = j.GetMotorSpeed() + maxJointAcceleration;
+                } else {
+                    jointSpeed = j.GetMotorSpeed() - maxJointAcceleration;
+                }
+            }
+            if (round(degrees(j.GetJointAngle())) < round(degrees(j.GetUpperLimit())) && round(degrees(j.GetJointAngle())) > round(degrees(j.GetLowerLimit()))){
+            j.SetMotorSpeed(jointSpeed);
+
+            counter += 1;
+
+
+            }
+            else{
+              if (round(degrees(j.GetJointAngle())) > round(degrees(j.GetUpperLimit()))){
+                j.SetMotorSpeed(-this.jointSpeed);
+              }
+
+              if (round(degrees(j.GetJointAngle())) < round(degrees(j.GetLowerLimit()))){
+                j.SetMotorSpeed(this.jointSpeed);
+              }
+            }
+          }
   }
 
   update() {
@@ -183,70 +263,12 @@ class Player {
         }
         this.oldx = this.bodies[0].GetPosition().x*SCALE
 
-
+        this.move()
 
 
 
 
         //--------------
-        let counter = 0;
-        for (var j of this.joints) {
-
-                //for each joint
-
-                let jointSpeed = this.jointSpeeds[counter];
-                let simulatedEase = false;
-                //if the joint is limited then decrease the velocity of the joint as it reaches the limits so it looks more natural
-                if (j.limitRevolution) {
-
-                    let upperLim = j.joint.GetUpperLimit();
-                    let lowerLim = j.joint.GetLowerLimit();
-                    let jointRange = upperLim - lowerLim;
-                    let jointAngle = j.joint.GetJointAngle();
-
-                    //if the joint is near the limit then slow the joint speed down to simulate ease in and out
-                    let previousJointSpeed = jointSpeed;
-
-                    if (jointSpeed < 0) {
-                        if (jointAngle - lowerLim < 0.2 * jointRange) {
-                            if (jointAngle < lowerLim) {
-                                jointSpeed = 0;
-                                simulatedEase = true;
-                            } else {
-                                jointSpeed = map(jointAngle - lowerLim, 0, 0.2 * jointRange, this.jointSpeeds[counter], 0);
-                                simulatedEase = true;
-                            }
-                        }
-
-                    } else {
-
-                        if (upperLim - jointAngle < 0.2 * jointRange) {
-                            if (upperLim < jointAngle) {
-                                jointSpeed = 0;
-                                simulatedEase = true;
-                            } else {
-                                jointSpeed = map(upperLim - jointAngle, 0, 0.2 * jointRange, 0, this.jointSpeeds[counter]);
-                                simulatedEase = true;
-                            }
-                        }
-
-
-                    }
-
-                }
-
-
-                //if the joint hasnt already had simulated ease applied because its close to the limits then limit the joints acceleration so it looks more natural
-                if (!simulatedEase && Math.abs(j.GetMotorSpeed() - jointSpeed) > maxJointAcceleration) {
-                    if (jointSpeed > j.GetMotorSpeed()) {
-                        jointSpeed = j.GetMotorSpeed() + maxJointAcceleration;
-                    } else {
-                        jointSpeed = j.GetMotorSpeed() - maxJointAcceleration;
-                    }
-                }
-                j.SetMotorSpeed(jointSpeed);
-                counter += 1;
-
 
       //----------------------------------
 
@@ -255,7 +277,7 @@ class Player {
 
 
 
-    }
+
 
     for (var i = 0 ; i < this.bodies.length; i++) {
 
@@ -296,19 +318,21 @@ class Player {
   look() {
     this.vision = [];
 
+
     //-------------------------------------------angles and speeds of revolute joints
     let jointAngles = [];
     let inputJointSpeeds = [];
     for (var j of this.joints) {
 
-            if (j.limitRevolution) {// if limited then map 0 and 1 to the limits
+            // if limited then map 0 and 1 to the limits
                 let upperLim = j.GetUpperLimit();
                 let lowerLim = j.GetLowerLimit();
-                let jointAngle = constrain(j.joint.GetJointAngle(), lowerLim, upperLim);//make sure the angle is within the limit (sometimes the physics engine can be a little fucky)
+                let jointAngle = constrain(j.GetJointAngle(), lowerLim, upperLim);//make sure the angle is within the limit (sometimes the physics engine can be a little fucky)
                 this.vision.push(map(jointAngle, lowerLim, upperLim, 0, 1));
-            } else {
-                jointAngles.push(j.GetJointAngle());
-            }
+                this.vision.push(degrees(j.GetUpperLimit()))
+                this.vision.push(degrees(j.GetLowerLimit()))
+
+
 
             inputJointSpeeds.push(j.GetJointSpeed());
 
@@ -359,25 +383,12 @@ class Player {
 
     let averageRotationRelativeToMass = 0;
     for (let i = 0; i < this.bodies.length; i++) {
-        let val = getAngleBetween0and2PI(this.bodies[i].GetAngle());
-        let angle = getAngleBetween0and2PI(this.bodies[i].GetA);
-        //get the difference between the current angle and the stating angle
-        let angleDiff = val - angle;
+        let angle = getAngleBetween0and2PI(this.bodies[i].GetAngle());
+        this.vision.push(degrees(angle));
 
-        //now we want that difference to be in range (-PI,PI)
-
-        if (angleDiff > PI) {
-            angleDiff -= 2 * PI;
-        } else if (angleDiff < -PI) {
-            angleDiff += 2 * PI;
-        }
-
-        //now we need to calculate the effeted difference based on it mass
-        let rotationMass = bodyMasses[i] * angle / totalMass;
-        averageRotationRelativeToMass += rotationMass;
     }
 
-    //this.vision.push(map(averageRotationRelativeToMass, -PI, PI, -1, 1));
+
 
     //-------------------------------------------height off the ground based on weight
     //essentially get the height of the center of mass of the entire creature
@@ -422,8 +433,10 @@ class Player {
         let val = this.bodies[i].GetAngularVelocity();
 
         averageAngularVelRelativeToMass += bodyMasses[i] * val / totalMass;
+        this.vision.push(val);
+
     }
-    this.vision.push(map(averageAngularVelRelativeToMass, -1.5, 1.5, -1, 1));
+
 
   }
 
@@ -485,6 +498,20 @@ class Player {
     child.brain.generateNetwork();
     return child;
   }
+
+
+  overLappingOtherBody(body1, body2) {
+
+          for (let f of this.bodies) {
+              for (let f2 of body2.fixtures) {
+                  if (f.isOverlappingWith(f2)) {
+                      return true;
+                  }
+              }
+          }
+          return false;
+
+      }
 }
 
 function getAngleBetween0and2PI(angle) {

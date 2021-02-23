@@ -54,6 +54,7 @@ let WORLD
 let offset
 let offBeg
 let lazerSpeed = 1
+var col = [173, 216, 255, 255]
 let bodyCopy = []
 let offY = 0
 let lUp
@@ -182,7 +183,7 @@ function draw() {
       // for (var w of worlds) {
       //   w.Step(1 / 30, 10, 10);
       // }
-      
+
       population.stepWorldsInBatch();
       population.updateAlive();
     } else { //all dead

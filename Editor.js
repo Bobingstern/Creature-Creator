@@ -18,6 +18,7 @@ class Editor {
     this.jointDraw = false
     this.jointBody = []
     this.jointAnchorLocation = []
+    this.buttons = []
     // Buttons
     this.makeButtons()
     this.evolveFunction = evolveFunc
@@ -39,6 +40,7 @@ class Editor {
     this.deathMode = false
     this.DeadShots = []
     this.downScalar = 2
+
 
     ///----------------------TODO: ADD DEATH MODE BUTTON
 
@@ -64,6 +66,7 @@ class Editor {
   }
 
   evolve() {
+    editor.buttons = []
     editor.FloorButton.remove()
     editor.DeletButton.remove()
     editor.TestButton.remove()
@@ -99,7 +102,13 @@ class Editor {
   show() {
     // Rect stuff
 
-
+    // for (var i=0;i<this.buttons.length;i++){
+    //   push()
+    //   rectMode(CORNER)
+    //   fill(255, 255, 255)
+    //   rect(this.buttons[i][0]-10, this.buttons[i][1]-10, this.buttons[i][2], this.buttons[i][3])
+    //   pop()
+    // }
 
 
     if (this.RectDrawing && !this.rectDeleteMode && !this.deathMode){
@@ -494,16 +503,18 @@ class Editor {
   }
 
   makeButton(text, bgcolor, x, y, w, h, size) {
+    this.buttons.push([x, y, w, h])
+
     let button = createButton(text)
-    button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2]))
+    button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], bgcolor[3]))
     button.position(x, y)
     button.size(w, h)
     button.style("font-size", size)
     button.mouseOver(function() {
-      button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], 100))
+      button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], bgcolor[3], 100))
     })
     button.mouseOut(function() {
-      button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], 255))
+      button.style("background-color", color(bgcolor[0], bgcolor[1], bgcolor[2], bgcolor[3], 255))
     })
     return button
   }
