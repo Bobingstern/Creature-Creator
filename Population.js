@@ -12,6 +12,10 @@ class Population {
 
     this.massExtinctionEvent = false;
     this.newStage = false;
+    this.batchNo = 1
+    this.worldsPerBatch = 5
+
+    this.batches = batches
 
     for (var i = 0; i < size; i++) {
       this.players.push(new Player());
@@ -71,6 +75,7 @@ class Population {
   naturalSelection() {
 
     // this.batchNo = 0;
+    this.batchNo = 1;
     var previousBest = this.players[0];
     this.speciate(); //seperate the this.players varo this.species
     this.calculateFitness(); //calculate the fitness of each player
@@ -236,31 +241,41 @@ class Population {
     //              BATCH LEARNING
     //------------------------------------------------------------------------------------------------------------------------------------------
     //update all the players which are alive
-  updateAliveInBatches() {
-    let aliveCount = 0;
-    for (var i = 0; i < this.players.length; i++) {
-      if (this.playerInBatch(this.players[i])) {
+    updateAliveInBatches() {
+      let aliveCount = 0;
 
-        if (!this.players[i].dead) {
-          aliveCount++;
-          this.players[i].look(); //get inputs for brain
-          this.players[i].think(); //use outputs from neural network
-          this.players[i].update(); //move the player according to the outputs from the neural network
-          if (!showNothing && (!showBest || i == 0)) {
-            this.players[i].show();
+
+      for (var i = 0; i < this.players.length; i++) {
+
+        if (i < (this.players.length/this.batches)*this.batchNo && i > (this.players.length/this.batches)*(this.batchNo-1)) {
+
+          if (!this.players[i].dead) {
+            aliveCount++;
+
+            this.players[i].look(); //get inputs for brain
+            this.players[i].think(); //use outputs from neural network
+            this.players[i].update(); //move the player according to the outputs from the neural network
+            if (!showNothing && (!showBest || i == 0)) {
+              this.players[i].show();
+            }
+            if (this.players[i].score > this.globalBestScore) {
+              this.globalBestScore = this.players[i].score;
+            }
           }
-          if (this.players[i].score > this.globalBestScore) {
-            this.globalBestScore = this.players[i].score;
+          else{
+            this.players[i].ded()
           }
         }
+
+      }
+
+
+
+
+      if (aliveCount == 0) {
+        this.batchNo++;
       }
     }
-
-
-    if (aliveCount == 0) {
-      this.batchNo++;
-    }
-  }
 
 
   playerInBatch(player) {

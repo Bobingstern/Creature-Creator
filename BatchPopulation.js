@@ -17,7 +17,7 @@ class BatchPopulation {
 
 
       this.batchNo = 0;
-      this.worldsPerBatch = 50
+      this.worldsPerBatch = 10
 
 
       for (var i = 0; i < numberOfWorlds; i++) {

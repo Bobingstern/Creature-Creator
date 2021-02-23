@@ -12,11 +12,11 @@ class Player {
     this.dead = false;
     this.score = 0;
     this.gen = 0;
-    this.world = getFreeWorld()
+    this.world = new b2World(new b2Vec2(0, 10))
     this.bodies = []
     this.joints = []
     this.bodyScales = []
-    this.downScalar = 1.3
+    this.downScalar = 2
 
     this.speed = 5
     this.lazer = createVector(0, 0)
@@ -33,7 +33,7 @@ class Player {
     //270 and 360
     //console.log(height-offY)
 
-    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 1, 100, 0.2, 2, 10)
+    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 10000000000000000000000, 1, 1, 0.2, 2, 10)
     this.ground.SetUserData("ground")
 
     //this.ground.SetFilterData()
@@ -249,7 +249,7 @@ class Player {
     }
     if (!(this.dead)) {
 
-      //this.world.Step(1 / 60, 10, 10)
+      this.world.Step(1 / 60, 10, 10)
 
 
       this.fitness = this.bodies[0].GetPosition().x
@@ -329,8 +329,7 @@ class Player {
                 let lowerLim = j.GetLowerLimit();
                 let jointAngle = constrain(j.GetJointAngle(), lowerLim, upperLim);//make sure the angle is within the limit (sometimes the physics engine can be a little fucky)
                 this.vision.push(map(jointAngle, lowerLim, upperLim, 0, 1));
-                this.vision.push(degrees(j.GetUpperLimit()))
-                this.vision.push(degrees(j.GetLowerLimit()))
+
 
 
 

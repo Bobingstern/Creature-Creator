@@ -66,6 +66,8 @@ let worlds = []
 var numberOfWorlds = 5;
 var playersPerWorld = 100;
 var playersInEachWorld = [];
+let batches = 7
+let PopSize = 500
 
 
 function clearWorlds() {
@@ -132,7 +134,7 @@ function getBest() {
   let best_player = null
   let best_fitness = 0
   for (var i = 0; i < population.players.length; i++) {
-    if (population.players[i].score > best_fitness && !(population.players[i].dead) && population.playerInBatch(population.players[i])) {
+    if (population.players[i].score > best_fitness && !(population.players[i].dead)) {
       best_fitness = population.players[i].fitness
       best_player = population.players[i]
     }
@@ -179,14 +181,11 @@ function draw() {
       showBestEverPlayer();
 
     } else {  //if just evolving normally
-      if (!population.done()) { //if any players are alive then update them
-      // for (var w of worlds) {
-      //   w.Step(1 / 30, 10, 10);
-      // }
+      if (population.batchNo != population.batches+1) { //if any players are alive then update them
 
-      population.stepWorldsInBatch();
-      population.updateAlive();
-    } else { //all dead
+        population.updateAliveInBatches();
+
+      } else { //all dead
       //genetic algorithm
       // grounds[0].show()
       population.naturalSelection();
@@ -251,7 +250,7 @@ function startEvo(){
   offY = height-lowestY
 
 
-  population = new BatchPopulation();
+  population = new Population(PopSize);
   started = true
 
   offBeg = population.players[0].bodies[0].GetPosition().x*SCALE-400
@@ -334,7 +333,7 @@ function writeInfo() {
   textAlign(LEFT);
   textSize(30);
   text("Gen: " + population.gen, 300, 50);
-  text("Batch No: " + population.batchNo+"/10", 300, 100);
+  text("Batch No: " + population.batchNo+"/"+batches, 300, 100);
 
 
 
