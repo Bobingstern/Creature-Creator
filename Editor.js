@@ -40,6 +40,7 @@ class Editor {
     this.deathMode = false
     this.DeadShots = []
     this.downScalar = 2
+    this.jointShowId = -1
 
 
     ///----------------------TODO: ADD DEATH MODE BUTTON
@@ -229,6 +230,19 @@ class Editor {
 
 
     // Joint stuff-------------------
+
+
+
+    if (this.jointShowId != -1 && !this.inSim){
+      console.log(this.jointShowId)
+      push()
+      fill(255, 255, 0, 100)
+      rect(bodyData[this.jointShowId][0], bodyData[this.jointShowId][1], bodyData[this.jointShowId][2], bodyData[this.jointShowId][3])
+      pop()
+    }
+
+
+
     if (editor.jointBody.length % 2 != 0 || editor.jointBody.length == 0 || editor.jointBody.length / editor.jointAnchorLocation.length == 2) {
 
     } else {
@@ -238,6 +252,13 @@ class Editor {
       pop()
     }
     if (this.jointDraw && !(this.inSim)) {
+
+
+
+
+
+
+
       // if (editor.jointBody.length / editor.jointAnchorLocation.length == 2){
       //   push()
       //   fill(255, 255, 0, 80)
@@ -323,8 +344,8 @@ class Editor {
       pop()
 
       textSize(20)
-      text("Lower: "+this.curLeftAngle+" Upper: "+this.curRightAngle, 50, 100)
-      text("The Angle Limit thing is kinda confusing so i recommend testing the default angle to see how it works", 50, 150)
+      text("Lower: "+this.curLeftAngle+" Upper: "+this.curRightAngle, 120, 50)
+      text("The Angle Limit thing is kinda confusing so i recommend testing the default angle to see how it works. \nPress Enter to confirm and C to disregard this joint from the AI (It will still be connected)", 120, 80)
     }
 
 
@@ -447,6 +468,7 @@ class Editor {
     editor.groundWidth = width
     editor.groundHeight = 20
     editor.drawMode = true
+
   }
 
   ridLastPieceOfShit() {
@@ -605,7 +627,6 @@ function mouseClicked() {
     var copyOfJoint =  []
     //console.log(bodyData)
     bodyData.splice(closest, 1)
-    console.log(closest)
     for (var i=0;i<editor.jointBody.length;i+=2){
       copyOfJoint.push([i, i+1])
     }
@@ -655,6 +676,7 @@ function mouseClicked() {
 
 
   }
+  
 
 
 
@@ -682,12 +704,13 @@ function mouseClicked() {
         let id = bodyData[closest][4]
         if (editor.jointBody[editor.jointBody.length-1] != id){
           editor.jointBody.push(id)
+          editor.jointShowId = id
         }
 
       } else {
         editor.jointAnchorLocation.push([mouseX, mouseY])
         editor.jointLimitMode = true
-
+        editor.jointShowId = -1
 
 
       }
@@ -783,6 +806,13 @@ function keyPressed() {
     if (keyCode == 13){
       jointLimits.push([editor.curLeftAngle, editor.curRightAngle])
       editor.jointLimitMode = false
+
+    }
+
+    if (keyCode == 67){
+      jointLimits.push([editor.curLeftAngle, editor.curRightAngle])
+      editor.jointLimitMode = false
+      nonJoints.push(jointLimits.length-1)
 
     }
 

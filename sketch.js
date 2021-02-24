@@ -66,8 +66,9 @@ let worlds = []
 var numberOfWorlds = 5;
 var playersPerWorld = 100;
 var playersInEachWorld = [];
-let batches = 7
+let batches = 10
 let PopSize = 500
+let nonJoints = []
 
 
 function clearWorlds() {
@@ -323,7 +324,7 @@ function drawBrain() {  // show the brain of whatever genome is currently showin
   } else if (showBestEachGen) {
     genPlayerTemp.brain.drawGenome(startX, startY, w, h);
   } else {
-    population.players[0].brain.drawGenome(startX, startY, w, h);
+    population.players[0].brain.drawGenome(startX, startY, w, h+population.players[0].genomeInputs*10);
   }
 }
 

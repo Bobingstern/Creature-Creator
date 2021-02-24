@@ -12,7 +12,7 @@ class Player {
     this.dead = false;
     this.score = 0;
     this.gen = 0;
-    this.world = new b2World(new b2Vec2(0, 10))
+    this.world = new b2World(new b2Vec2(0, 50))
     this.bodies = []
     this.joints = []
     this.bodyScales = []
@@ -28,19 +28,20 @@ class Player {
     this.jointSpeeds = []
     this.jointSpeed = 5
     this.maxJointSpeed = 5
+    this.nonJoints = []
 
     //TODO: JOINT ACCELARTION AND HUMAN LIKE JOINT MOVEMETNS FUCK FUCK ITS SO HARD
     //270 and 360
     //console.log(height-offY)
 
-    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 10000000000000000000000, 1, 1, 0.2, 2, 10)
+    this.ground = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 1000000, 0.3, 0.4, 1)
     this.ground.SetUserData("ground")
 
     //this.ground.SetFilterData()
     this.groundWidth = width*10000000
     this.groundHeight = 20
 
-    this.ground2 = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 1, 100, 0.2, 1)
+    //this.ground2 = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 1, 100, 0.2, 1)
 
 
     var lowestY = 0
@@ -49,7 +50,7 @@ class Player {
 
     for (let i = 0; i < bodyData.length; i++) {
       var area = ((bodyData[i][2] / 2)/this.downScalar) * ((bodyData[i][3] / 2)/this.downScalar)
-      this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, (bodyData[i][1] + bodyData[i][3] / 2), (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, 2, 100, 0.1, 1))
+      this.bodies.push(makeBox(this.world, b2Body.b2_dynamicBody, bodyData[i][0] + bodyData[i][2] / 2, (bodyData[i][1] + bodyData[i][3] / 2), (bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar, 2, 3, 0.1, 1))
       this.bodyScales.push([(bodyData[i][2] / 2)/this.downScalar, (bodyData[i][3] / 2)/this.downScalar])
     }
 
@@ -79,8 +80,19 @@ class Player {
       jointDef.localAnchorB.Set(bodyBoffset.x, bodyBoffset.y)
       jointDef.collideConnected = false
 
-      this.joints.push(this.world.CreateJoint(jointDef))
-      this.jointSpeeds.push(0)
+      var getOofed = false
+      for (var j=0;j<nonJoints;j++){
+        if (nonJoints[j] == i){
+          getOofed = true
+        }
+      }
+      if (!getOofed){
+        this.joints.push(this.world.CreateJoint(jointDef))
+        this.jointSpeeds.push(0)
+      }
+      else{
+        this.nonJoints.push(this.world.CreateJoint(jointDef))
+      }
     }
 
     this.look()
@@ -97,6 +109,22 @@ class Player {
         this.bodies[DeadShots[i]].SetUserData("body")
 
       }
+    }
+
+
+
+    var lowestY = 0
+
+    for (var i=0;i<this.bodies.length;i++){
+      if (this.bodies[i].GetPosition().y*SCALE+this.bodyScales[i][1] > lowestY){
+        lowestY = this.bodies[i].GetPosition().y*SCALE+this.bodyScales[i][1]
+      }
+    }
+
+    var yDiff = (this.ground.GetPosition().y*SCALE-this.groundHeight)-lowestY
+
+    for (var i=0;i<this.bodies.length;i++){
+      this.bodies[i].SetPosition(new b2Vec2(this.bodies[i].GetPosition().x, (this.bodies[i].GetPosition().y*SCALE+yDiff)/SCALE), this.bodies[i].GetAngle())
     }
 
 
@@ -232,11 +260,11 @@ class Player {
             }
             else{
               if (round(degrees(j.GetJointAngle())) > round(degrees(j.GetUpperLimit()))){
-                j.SetMotorSpeed(-this.jointSpeed);
+                j.SetMotorSpeed(-2);
               }
 
               if (round(degrees(j.GetJointAngle())) < round(degrees(j.GetLowerLimit()))){
-                j.SetMotorSpeed(this.jointSpeed);
+                j.SetMotorSpeed(2);
               }
             }
           }
@@ -328,7 +356,7 @@ class Player {
                 let upperLim = j.GetUpperLimit();
                 let lowerLim = j.GetLowerLimit();
                 let jointAngle = constrain(j.GetJointAngle(), lowerLim, upperLim);//make sure the angle is within the limit (sometimes the physics engine can be a little fucky)
-                this.vision.push(map(jointAngle, lowerLim, upperLim, 0, 1));
+
 
 
 
