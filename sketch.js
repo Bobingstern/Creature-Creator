@@ -324,7 +324,10 @@ function drawBrain() {  // show the brain of whatever genome is currently showin
   } else if (showBestEachGen) {
     genPlayerTemp.brain.drawGenome(startX, startY, w, h);
   } else {
-    population.players[0].brain.drawGenome(startX, startY, w, h+population.players[0].genomeInputs*10);
+    let be = getBest()
+    if (be != null){
+    be.brain.drawGenome(startX, startY, w, h+population.players[0].genomeInputs*10);
+  }
   }
 }
 

@@ -411,7 +411,7 @@ class Player {
     let averageRotationRelativeToMass = 0;
     for (let i = 0; i < this.bodies.length; i++) {
         let angle = getAngleBetween0and2PI(this.bodies[i].GetAngle());
-        this.vision.push(degrees(angle));
+        this.vision.push(map(degrees(angle), 0, 360, 0, 10));
 
     }
 

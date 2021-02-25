@@ -141,7 +141,7 @@ class Editor {
             rect(this.RectDrawX, this.RectDrawY, (mouseX - this.RectDrawX), (mouseY - this.RectDrawY))
             pop()
           }
-          else{
+          else {
             var originX = editor.RectDrawX
             var originY = editor.RectDrawY
             var toDrawPointX = (mouseX - editor.RectDrawX)
@@ -594,6 +594,14 @@ function mouseClicked() {
       var h = editor.RectDrawY-originY
 
 
+      if (h < 0){
+        y += h
+        h *= -1
+      }
+
+      console.log([x, y, w, h])
+
+
       bodyData.push([x, y, w, h, editor.id])
       editor.RectDraw = false
       editor.rectDrawFlag = false
@@ -676,7 +684,7 @@ function mouseClicked() {
 
 
   }
-  
+
 
 
 
