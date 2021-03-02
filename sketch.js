@@ -66,10 +66,10 @@ let worlds = []
 var numberOfWorlds = 5;
 var playersPerWorld = 100;
 var playersInEachWorld = [];
-let batches = 10
-let PopSize = 500
+let batches = 5
+let PopSize = 300
 let nonJoints = []
-
+let BESTOFGEN = null
 
 function clearWorlds() {
   for (var i = 0; i < playersInEachWorld.length; i++) {
@@ -85,7 +85,7 @@ function getFreeWorld() {
 function newWorlds() {
   console.log("New WOrld");
 
-worlds = []
+  worlds = []
 
 
   population.bestScore = 0; //the score of the best ever player
@@ -144,6 +144,20 @@ function getBest() {
 }
 
 
+
+function getBestDead() {
+  let best_player = null
+  let best_fitness = 0
+  for (var i = 0; i < population.players.length; i++) {
+    if (population.players[i].score > best_fitness) {
+      best_fitness = population.players[i].fitness
+      best_player = population.players[i]
+    }
+  }
+  return best_player
+}
+
+
 function setup() {
   window.canvas = createCanvas(1280, 720);
   frameRate(60)
@@ -172,6 +186,7 @@ function draw() {
   rectMode(CORNER)
   rect(-10000000, height-20, 100000000000000, 20)
   pop()
+
   if (started){
     drawToScreen();
     if (showBestEachGen) {  //show the best of each gen
@@ -183,16 +198,32 @@ function draw() {
 
     } else {  //if just evolving normally
       if (population.batchNo != population.batches+1) { //if any players are alive then update them
-
+        if (BESTOFGEN != null){
+          BESTOFGEN.look()
+          BESTOFGEN.think()
+          BESTOFGEN.update()
+        }
         population.updateAliveInBatches();
 
       } else { //all dead
       //genetic algorithm
       // grounds[0].show()
+
+        BESTOFGEN = new Player()
+        BESTOFGEN.brain = getBestDead().brain
+
+
       population.naturalSelection();
 
       }
 
+    }
+
+
+    if (actualBest){
+      if (BESTOFGEN != null && !BESTOFGEN.dead){
+        BESTOFGEN.show()
+      }
     }
 
 
@@ -324,10 +355,15 @@ function drawBrain() {  // show the brain of whatever genome is currently showin
   } else if (showBestEachGen) {
     genPlayerTemp.brain.drawGenome(startX, startY, w, h);
   } else {
-    let be = getBest()
-    if (be != null){
-    be.brain.drawGenome(startX, startY, w, h+population.players[0].genomeInputs*10);
-  }
+    if (BESTOFGEN == null){
+      let be = getBest()
+      if (be != null){
+        be.brain.drawGenome(startX, startY, w, h+population.players[0].genomeInputs*10);
+      }
+    }
+    else{
+      BESTOFGEN.brain.drawGenome(startX, startY, w, h+population.players[0].genomeInputs*10);
+    }
   }
 }
 

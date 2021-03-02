@@ -40,6 +40,7 @@ class Player {
     //this.ground.SetFilterData()
     this.groundWidth = width*10000000
     this.groundHeight = 20
+    this.dedd = 0
 
     //this.ground2 = makeBox(this.world, b2Body.b2_staticBody, 0, height, width*10000000, 20, 1, 100, 0.2, 1)
 
@@ -318,6 +319,7 @@ class Player {
 
   ded(){
     this.world.Step(1/60, 10, 10)
+    this.dedd++
     for (var i=0;i<this.joints.length;i++){
       this.world.DestroyJoint(this.joints[i])
     }

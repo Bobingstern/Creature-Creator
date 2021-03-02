@@ -36,7 +36,7 @@ class Population {
             this.globalBestScore = this.players[i].score;
           }
         }
-        else if (!showBest){
+        else if (!showBest && this.players[i].dedd<50){
           this.players[i].ded()
         }
       }
@@ -255,14 +255,14 @@ class Population {
             this.players[i].look(); //get inputs for brain
             this.players[i].think(); //use outputs from neural network
             this.players[i].update(); //move the player according to the outputs from the neural network
-            if (!showNothing && (!showBest || i == 0)) {
+            if (!showNothing && (!actualBest || i == 0)) {
               this.players[i].show();
             }
             if (this.players[i].score > this.globalBestScore) {
               this.globalBestScore = this.players[i].score;
             }
           }
-          else{
+          else if (this.players[i].dedd < 100 && !actualBest){
             this.players[i].ded()
           }
         }
@@ -274,6 +274,11 @@ class Population {
 
       if (aliveCount == 0) {
         this.batchNo++;
+        BESTOFGEN = new Player()
+
+        BESTOFGEN.brain = getBestDead().brain
+
+
       }
     }
 

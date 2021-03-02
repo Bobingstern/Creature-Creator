@@ -234,7 +234,6 @@ class Editor {
 
 
     if (this.jointShowId != -1 && !this.inSim){
-      console.log(this.jointShowId)
       push()
       fill(255, 255, 0, 100)
       rect(bodyData[this.jointShowId][0], bodyData[this.jointShowId][1], bodyData[this.jointShowId][2], bodyData[this.jointShowId][3])
@@ -680,7 +679,6 @@ function mouseClicked() {
     }
 
     DeadShots.push(closest)
-    console.log(DeadShots)
 
 
   }
