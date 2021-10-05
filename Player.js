@@ -29,7 +29,7 @@ class Player {
     this.jointSpeed = 5
     this.maxJointSpeed = 5
     this.nonJoints = []
-    this.spood = 20;
+    this.spood = 15;
 
     //TODO: JOINT ACCELARTION AND HUMAN LIKE JOINT MOVEMETNS ITS SO HARD
     //270 and 360
