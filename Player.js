@@ -29,8 +29,9 @@ class Player {
     this.jointSpeed = 5
     this.maxJointSpeed = 5
     this.nonJoints = []
+    this.spood = 20;
 
-    //TODO: JOINT ACCELARTION AND HUMAN LIKE JOINT MOVEMETNS FUCK FUCK ITS SO HARD
+    //TODO: JOINT ACCELARTION AND HUMAN LIKE JOINT MOVEMETNS ITS SO HARD
     //270 and 360
     //console.log(height-offY)
 
@@ -261,11 +262,11 @@ class Player {
             }
             else{
               if (round(degrees(j.GetJointAngle())) > round(degrees(j.GetUpperLimit()))){
-                j.SetMotorSpeed(-2);
+                j.SetMotorSpeed(-this.spood);
               }
 
               if (round(degrees(j.GetJointAngle())) < round(degrees(j.GetLowerLimit()))){
-                j.SetMotorSpeed(2);
+                j.SetMotorSpeed(this.spood);
               }
             }
           }
