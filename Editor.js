@@ -42,7 +42,8 @@ class Editor {
     this.downScalar = 2
     this.jointShowId = -1
 
-
+    this.toX = 0;
+    this.toY = 0;
     ///----------------------TODO: ADD DEATH MODE BUTTON
 
 
@@ -55,11 +56,9 @@ class Editor {
     this.EvolveButton.mousePressed(this.evolve)
     this.ToggleDrawModeButton = this.makeButton("Switch to Joint mode", [0, 127, 255], 10, 110, 100, 50, 14)
     this.ToggleDrawModeButton.mousePressed(this.toggleMode)
-    this.UndoButton = this.makeButton("Undo (Glitchy)", [255, 255, 0], 10, 160, 100, 50, 18)
-    this.UndoButton.mousePressed(this.ridLastPieceOfShit)
-    this.ClearButton = this.makeButton("Clear World", [255, 0, 0], 10, 210, 100, 50, 19)
+    this.ClearButton = this.makeButton("Clear World", [255, 0, 0], 10, 160, 100, 50, 19)
     this.ClearButton.mousePressed(this.ridWorldOfShit)
-    this.DeletButton = this.makeButton("Delete Mode", [255, 0, 255], 10, 260, 100, 50, 19)
+    this.DeletButton = this.makeButton("Delete Mode", [255, 0, 255], 10, 210, 100, 50, 19)
     this.DeletButton.mousePressed(this.rectDelMode)
     this.FloorButton = this.makeButton("Death on Floor Mode", [255, 255, 255], 10, 310, 100, 50, 15)
     this.FloorButton.mousePressed(this.deathFloorButton)
@@ -71,7 +70,7 @@ class Editor {
     editor.FloorButton.remove()
     editor.DeletButton.remove()
     editor.TestButton.remove()
-    editor.UndoButton.remove()
+    //editor.UndoButton.remove()
     editor.ClearButton.remove()
     editor.ToggleDrawModeButton.remove()
     editor.EvolveButton.remove()
@@ -135,17 +134,31 @@ class Editor {
 
         if (editor.RectDraw && editor.rectDrawFlag && !editor.rectDeleteMode && !editor.deathMode) {
           if (mouseX - editor.RectDrawX > 1 && mouseY - editor.RectDrawY > 1){
-            push()
+            if (keyIsDown(16)){
+              push()
+              fill(255, 255, 255, 50)
+              rectMode(CORNER)
+              this.toX = (mouseX - this.RectDrawX);
+              this.toY = (mouseX - this.RectDrawX)
+              rect(this.RectDrawX, this.RectDrawY, this.toX, this.toY)
+              pop()
+            }
+            else{
+              push()
             fill(255, 255, 255, 50)
             rectMode(CORNER)
-            rect(this.RectDrawX, this.RectDrawY, (mouseX - this.RectDrawX), (mouseY - this.RectDrawY))
+            this.toX = (mouseX - this.RectDrawX);
+            this.toY = (mouseY - this.RectDrawY)
+            rect(this.RectDrawX, this.RectDrawY,this.toX, this.toY)
             pop()
+            }
+            
           }
           else {
             var originX = editor.RectDrawX
             var originY = editor.RectDrawY
-            var toDrawPointX = (mouseX - editor.RectDrawX)
-            var toDrawPointX = (mouseY - editor.RectDrawY)
+            var toDrawPointX = this.toX;
+            var toDrawPointX = this.toY;
 
 
             originX = mouseX
@@ -384,7 +397,7 @@ class Editor {
       editor.TestButton = editor.makeButton("Exit Simulation", [0, 255, 0], 10, 10, 100, 50, 19)
       editor.TestButton.mousePressed(editor.exitSim)
     }
-    editor.UndoButton.remove()
+    //editor.UndoButton.remove()
     editor.ClearButton.remove()
     editor.ToggleDrawModeButton.remove()
     editor.EvolveButton.remove()
@@ -591,15 +604,20 @@ function mouseClicked() {
       var y = originY
       var w = editor.RectDrawX-originX
       var h = editor.RectDrawY-originY
-
+      
 
       if (h < 0){
         y += h
         h *= -1
       }
+      if (w<0){
+        x+=w;
+        w*=-1;
+      }
 
-      console.log([x, y, w, h])
+      
 
+      
 
       bodyData.push([x, y, w, h, editor.id])
       editor.RectDraw = false
@@ -607,6 +625,7 @@ function mouseClicked() {
       cheesecakes = true
       editor.id++
     }
+    console.log(bodyData[bodyData.length-1]);
   }
 
   if (editor.RectDrawing && !editor.rectDrawFlag && !cheesecakes && !editor.rectDeleteMode && !editor.deathMode){
